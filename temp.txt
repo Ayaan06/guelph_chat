@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
-import { authOptions, type AppSession } from "@/lib/auth";
+import { authOptions } from "@/lib/auth";
 import { SignInButton, SignOutButton } from "@/components/auth-buttons";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage() {
-  const session = (await getServerSession(authOptions)) as AppSession | null;
+  const session = await getServerSession(authOptions);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 text-slate-100">

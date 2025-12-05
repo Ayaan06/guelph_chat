@@ -1,10 +1,10 @@
-import { authOptions } from "@/lib/auth";
+import { authOptions, type AppSession } from "@/lib/auth";
 import { SignOutButton } from "@/components/auth-buttons";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as AppSession | null;
 
   if (!session?.user) {
     redirect("/login");
