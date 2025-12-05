@@ -1,0 +1,105 @@
+import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { authOptions } from "@/lib/auth";
+import { SignInButton, SignOutButton } from "@/components/auth-buttons";
+
+export const metadata: Metadata = {
+  title: "Login | Guelph Chat",
+};
+
+export default async function LoginPage() {
+  const session = await getServerSession(authOptions);
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 text-slate-100">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-6 py-16 md:flex-row md:items-center md:justify-between">
+        <section className="max-w-xl space-y-6">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-100 shadow-lg shadow-blue-900/30 backdrop-blur">
+            Secure sign-in · Backed by Prisma
+          </p>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
+              Sign in with Google to start chatting.
+            </h1>
+            <p className="text-lg text-slate-200/80">
+              We use NextAuth with Prisma on Vercel Postgres to keep your
+              profile, sessions, and connected accounts safely stored in the
+              database.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-blue-50/80">
+            <span className="rounded-full border border-white/15 px-3 py-1">
+              OAuth2 via Google
+            </span>
+            <span className="rounded-full border border-white/15 px-3 py-1">
+              Prisma adapter
+            </span>
+            <span className="rounded-full border border-white/15 px-3 py-1">
+              Session storage
+            </span>
+          </div>
+        </section>
+
+        <section className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-blue-900/40 backdrop-blur">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-blue-400/10" />
+          <div className="relative space-y-6">
+            <header className="space-y-2">
+              <p className="text-sm uppercase tracking-[0.18em] text-blue-100">
+                Google Login
+              </p>
+              <h2 className="text-2xl font-semibold text-white">
+                {session?.user ? "You're signed in" : "Welcome back"}
+              </h2>
+              <p className="text-sm text-slate-100/75">
+                {session?.user
+                  ? "Access your account or sign out below."
+                  : "Authenticate with your Google account to continue."}
+              </p>
+            </header>
+
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-black/30 p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-lg font-semibold uppercase">
+                  {session?.user?.name
+                    ? session.user.name.slice(0, 2)
+                    : "G"}
+                </div>
+                <div className="space-y-1 text-sm text-slate-100">
+                  <p className="font-semibold">
+                    {session?.user?.name ?? "Guest user"}
+                  </p>
+                  <p className="text-slate-300/70">
+                    {session?.user?.email ?? "Connect Google to personalize"}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-blue-100/70">
+                Your NextAuth session and profile are persisted in Postgres via
+                Prisma immediately after logging in.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {session?.user ? (
+                <>
+                  <Link
+                    href="/"
+                    className="flex h-12 w-full items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                  >
+                    Go to app
+                  </Link>
+                  <div className="flex justify-center">
+                    <SignOutButton />
+                  </div>
+                </>
+              ) : (
+                <SignInButton />
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
