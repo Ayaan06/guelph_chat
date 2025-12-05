@@ -9,6 +9,7 @@ export type AppSession = {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    username?: string | null;
   };
 };
 
@@ -32,10 +33,11 @@ export const authOptions = {
       user,
     }: {
       session: AppSession;
-      user: { id: string };
+      user: { id: string; username?: string | null };
     }) => {
       if (session.user) {
         session.user.id = user.id;
+        session.user.username = user.username ?? null;
       }
       return session;
     },
