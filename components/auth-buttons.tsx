@@ -26,11 +26,7 @@ function ActionButton({ children, onClick, variant = "primary" }: ButtonProps) {
 export function SignInButton() {
   return (
     <ActionButton
-      onClick={() =>
-        signIn("google", {
-          callbackUrl: "/",
-        })
-      }
+      onClick={() => signIn("google", { callbackUrl: "/onboarding" })}
     >
       <svg
         viewBox="0 0 48 48"
