@@ -1,6 +1,7 @@
-import { SignOutButton } from "@/components/auth-buttons";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ProfileForm } from "@/components/profile/ProfileForm";
 import { authOptions, type AppSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getMajorById, majors, mockUserProfile } from "@/lib/mockData";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
@@ -10,117 +11,72 @@ export default async function ProfilePage() {
     redirect("/auth");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      username: true,
-      name: true,
-      email: true,
-      image: true,
-      createdAt: true,
-    },
-  });
+  const userName = session.user.name ?? mockUserProfile.name;
+  const userEmail = session.user.email ?? mockUserProfile.email ?? undefined;
 
-  if (!user) {
-    redirect("/auth");
-  }
-
-  if (!user.username) {
-    redirect("/onboarding");
-  }
+  const profile = {
+    ...mockUserProfile,
+    name: userName,
+    email: userEmail,
+  };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <header className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
-              Profile
-            </p>
-            <h1 className="text-3xl font-semibold">
-              @{user.username}
-              {user.name ? ` · ${user.name}` : ""}
-            </h1>
-            {user.email && (
-              <p className="text-sm text-slate-600">{user.email}</p>
-            )}
-          </div>
-          <SignOutButton />
-        </header>
+    <AppLayout userName={userName} userEmail={userEmail}>
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">
+            Profile
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold text-slate-900">
+            {userName}
+          </h1>
+          {userEmail ? (
+            <p className="text-sm text-slate-600">{userEmail}</p>
+          ) : null}
+          <p className="mt-2 text-sm text-slate-600">
+            Customize your details. Saving is mocked locally for now.
+          </p>
+        </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">
-              Account information
-            </h2>
-            <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <dt className="text-xs uppercase tracking-[0.15em] text-slate-500">
-                  Username
-                </dt>
-                <dd className="mt-1 font-medium text-slate-900">
-                  @{user.username}
-                </dd>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <dt className="text-xs uppercase tracking-[0.15em] text-slate-500">
-                  Name
-                </dt>
-                <dd className="mt-1 font-medium text-slate-900">
-                  {user.name ?? "—"}
-                </dd>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <dt className="text-xs uppercase tracking-[0.15em] text-slate-500">
-                  Email
-                </dt>
-                <dd className="mt-1 font-medium text-slate-900">
-                  {user.email ?? "—"}
-                </dd>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <dt className="text-xs uppercase tracking-[0.15em] text-slate-500">
-                  Joined
-                </dt>
-                <dd className="mt-1 font-medium text-slate-900">
-                  {user.createdAt.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </dd>
-              </div>
-            </dl>
-            <p className="mt-6 text-xs text-slate-600">
-              You can update your username or name later by changing the form on
-              the onboarding page.
-            </p>
-          </section>
+        <div className="grid gap-6 lg:grid-cols-[1.8fr,1fr]">
+          <ProfileForm initialProfile={profile} majors={majors} />
+          <aside className="space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Snapshot
+              </h3>
+              <dl className="mt-3 space-y-3 text-sm text-slate-700">
+                <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-600">Major</dt>
+                  <dd className="font-semibold">
+                    {getMajorById(profile.majorId)?.name ?? "Undeclared"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-600">Year</dt>
+                  <dd className="font-semibold">{profile.year}</dd>
+                </div>
+                <div className="flex items-start justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-600">Interests</dt>
+                  <dd className="max-w-[220px] text-right font-semibold">
+                    {profile.interests.join(", ")}
+                  </dd>
+                </div>
+              </dl>
+            </div>
 
-          <section className="space-y-4 rounded-3xl border border-blue-100 bg-blue-50 p-6 text-sm text-blue-900 shadow-sm">
-            <h3 className="text-lg font-semibold text-blue-900">
-              What&apos;s stored
-            </h3>
-            <ul className="space-y-2">
-              <li className="flex items-start gap-3">
-                <span className="mt-0.5 h-2 w-2 rounded-full bg-blue-500" />
-                <span>
-                  Username and display name saved in your Prisma User record.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-0.5 h-2 w-2 rounded-full bg-blue-500" />
-                <span>
-                  OAuth account + sessions stored via Prisma adapter.
-                </span>
-              </li>
-            </ul>
-            <p className="text-xs text-blue-800/80">
-              Extend this page to show chat data or other profile fields.
-            </p>
-          </section>
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm text-sm text-blue-900">
+              <h4 className="text-base font-semibold text-blue-900">
+                Coming soon
+              </h4>
+              <p className="mt-2">
+                Sync this profile with your chat presence, show badges, and add
+                office hours for peer help.
+              </p>
+            </div>
+          </aside>
         </div>
       </div>
-    </main>
+    </AppLayout>
   );
 }

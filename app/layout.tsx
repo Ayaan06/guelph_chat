@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Guelph Chat Login",
-  description: "Google sign-in backed by NextAuth and Prisma",
+  title: "CampusChat",
+  description: "Course-based group chats and dashboards for students.",
 };
 
 export default function RootLayout({
