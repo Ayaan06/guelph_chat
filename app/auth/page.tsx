@@ -10,6 +10,10 @@ function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
+  const callbackUrl = useMemo(
+    () => searchParams.get("callbackUrl") ?? "/profile",
+    [searchParams],
+  );
 
   const [mode, setMode] = useState<Mode>(
     (searchParams.get("mode") as Mode) === "signup" ? "signup" : "login",
@@ -23,9 +27,9 @@ function AuthContent() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/profile");
+      router.replace(callbackUrl);
     }
-  }, [router, status]);
+  }, [callbackUrl, router, status]);
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -66,7 +70,7 @@ function AuthContent() {
       name: isSignup ? name : undefined,
       password,
       action: isSignup ? "signup" : "login",
-      callbackUrl: "/profile",
+      callbackUrl,
     });
 
     if (result?.error) {
@@ -75,17 +79,26 @@ function AuthContent() {
       return;
     }
 
-    router.push(result?.url ?? "/profile");
+    router.push(result?.url ?? callbackUrl);
     router.refresh();
   };
 
   const handleGoogle = () => {
     setError(null);
-    signIn("google", { callbackUrl: "/onboarding" });
+    signIn("google", { callbackUrl });
   };
 
   if (status === "authenticated") {
-    return null;
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-900 text-white">
+        <div className="rounded-3xl border border-white/10 bg-white/5 px-8 py-6 text-center shadow-2xl shadow-indigo-900/40 backdrop-blur">
+          <p className="text-xs uppercase tracking-[0.18em] text-indigo-100">
+            Logged in
+          </p>
+          <p className="mt-2 text-lg font-semibold">Redirecting to your page...</p>
+        </div>
+      </main>
+    );
   }
 
   return (
