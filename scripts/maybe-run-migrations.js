@@ -6,6 +6,30 @@ const skip =
   process.env.SKIP_PRISMA_MIGRATE === "true";
 const connectionString = process.env.DATABASE_URL;
 const connectionTimeoutMillis = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 5000;
+const useRelaxedTls = process.env.PRISMA_INSECURE_TLS === "1";
+
+function buildConnectionConfig(urlString) {
+  if (!urlString) return {};
+  const url = new URL(urlString);
+  const sslMode = url.searchParams.get("sslmode");
+  url.searchParams.delete("sslmode");
+
+  const shouldUseSsl =
+    sslMode?.toLowerCase() !== "disable" &&
+    !["localhost", "127.0.0.1"].includes(url.hostname);
+
+  return {
+    connectionString: url.toString(),
+    ssl:
+      shouldUseSsl && useRelaxedTls
+        ? {
+            rejectUnauthorized: false,
+          }
+        : shouldUseSsl
+          ? { rejectUnauthorized: false }
+          : undefined,
+  };
+}
 
 async function main() {
   if (skip) {
@@ -18,7 +42,10 @@ async function main() {
     return;
   }
 
-  const client = new Client({ connectionString, connectionTimeoutMillis });
+  const client = new Client({
+    ...buildConnectionConfig(connectionString),
+    connectionTimeoutMillis,
+  });
 
   try {
     await client.connect();
