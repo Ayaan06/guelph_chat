@@ -1,6 +1,7 @@
 import { ChatExperience } from "@/components/chat/ChatExperience";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { authOptions, type AppSession } from "@/lib/auth";
+import { ensureGlobalCourseAndMembership, GLOBAL_COURSE } from "@/lib/globalCourse";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
@@ -12,6 +13,8 @@ export default async function ChatPage() {
   if (!session?.user?.id) {
     redirect("/auth");
   }
+
+  await ensureGlobalCourseAndMembership(session.user.id);
 
   const memberships = await prisma.classMembership.findMany({
     where: { userId: session.user.id },
@@ -28,6 +31,20 @@ export default async function ChatPage() {
       major: course.major,
       level: course.level,
     }));
+
+  const hasGlobal = joinedCourses.some((course) => course.id === GLOBAL_COURSE.id);
+  const coursesWithGlobal = hasGlobal
+    ? joinedCourses
+    : [
+        {
+          id: GLOBAL_COURSE.id,
+          code: GLOBAL_COURSE.code,
+          name: GLOBAL_COURSE.name,
+          major: GLOBAL_COURSE.major,
+          level: GLOBAL_COURSE.level,
+        },
+        ...joinedCourses,
+      ];
 
   const userName = session.user?.name ?? session.user?.email ?? "You";
   const userEmail = session.user?.email ?? undefined;
@@ -65,7 +82,7 @@ export default async function ChatPage() {
           </div>
         </section>
 
-        <ChatExperience courses={joinedCourses} userId={session.user.id} />
+        <ChatExperience courses={coursesWithGlobal} userId={session.user.id} />
       </div>
     </AppLayout>
   );
