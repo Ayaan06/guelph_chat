@@ -1,9 +1,9 @@
-import { authOptions } from "@/lib/auth";
+import { authOptions, type AppSession } from "@/lib/auth";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as AppSession | null;
   const isAuthenticated = Boolean(session?.user);
 
   const primaryHref = isAuthenticated ? "/profile" : "/auth";
