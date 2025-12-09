@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
-import { DEFAULT_MESSAGE_PAGE_SIZE } from "@/lib/messages";
+import { MESSAGE_PAGE_SIZE } from "@/lib/chatConfig";
 import { hasRealtimeEnv, supabaseClient } from "@/lib/supabaseClient";
 import type { CourseSummary, MessageDTO } from "@/types/chat";
 
@@ -73,7 +73,7 @@ export function ChatExperience({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/messages?courseId=${courseId}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${courseId}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -104,7 +104,7 @@ export function ChatExperience({
 
     try {
       const response = await fetch(
-        `/api/messages?courseId=${activeCourse.id}&cursor=${nextCursor}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${activeCourse.id}&cursor=${nextCursor}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -136,7 +136,7 @@ export function ChatExperience({
     if (!activeCourse?.id) return;
     try {
       const response = await fetch(
-        `/api/messages?courseId=${activeCourse.id}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${activeCourse.id}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) return;
       const data = (await response.json()) as { messages: MessageDTO[] };

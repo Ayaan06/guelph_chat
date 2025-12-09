@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
-import { DEFAULT_MESSAGE_PAGE_SIZE } from "@/lib/messages";
+import { MESSAGE_PAGE_SIZE } from "@/lib/chatConfig";
 import { hasRealtimeEnv, supabaseClient } from "@/lib/supabaseClient";
 import type { ClassmateSummary, CourseSummary, MessageDTO } from "@/types/chat";
 
@@ -110,7 +110,7 @@ export function CourseChatLayout({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/messages?courseId=${course.id}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${course.id}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -140,7 +140,7 @@ export function CourseChatLayout({
 
     try {
       const response = await fetch(
-        `/api/messages?courseId=${course.id}&cursor=${nextCursor}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${course.id}&cursor=${nextCursor}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -171,7 +171,7 @@ export function CourseChatLayout({
   const refreshLatest = useCallback(async () => {
     try {
       const response = await fetch(
-        `/api/messages?courseId=${course.id}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+        `/api/messages?courseId=${course.id}&limit=${MESSAGE_PAGE_SIZE}`,
       );
       if (!response.ok) return;
       const data = (await response.json()) as { messages: MessageDTO[] };

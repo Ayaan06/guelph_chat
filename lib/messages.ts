@@ -1,8 +1,7 @@
 import type { Prisma } from "@prisma/client";
+import { MESSAGE_PAGE_SIZE } from "./chatConfig";
 import { prisma } from "./prisma";
 import type { MessageDTO } from "@/types/chat";
-
-export const DEFAULT_MESSAGE_PAGE_SIZE = 30;
 
 type MessageWithSender = Prisma.MessageGetPayload<{
   include: { sender: { select: { id: true; name: true | null; email: true | null } } };
@@ -23,7 +22,7 @@ export function mapMessageToDTO(message: MessageWithSender): MessageDTO {
 
 export async function fetchInitialMessagesForCourse(
   courseId: string,
-  limit = DEFAULT_MESSAGE_PAGE_SIZE,
+  limit = MESSAGE_PAGE_SIZE,
 ) {
   const results = await prisma.message.findMany({
     where: { courseId },

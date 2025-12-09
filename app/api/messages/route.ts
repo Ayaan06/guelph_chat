@@ -1,6 +1,7 @@
 import { authOptions, type AppSession } from "@/lib/auth";
-import { DEFAULT_MESSAGE_PAGE_SIZE, mapMessageToDTO } from "@/lib/messages";
+import { mapMessageToDTO } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
+import { MESSAGE_PAGE_SIZE } from "@/lib/chatConfig";
 import { getServerSession } from "next-auth";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -9,7 +10,7 @@ const MAX_LIMIT = 100;
 function parseLimit(value: string | null): number {
   const parsed = Number.parseInt(value ?? "", 10);
   if (Number.isNaN(parsed) || parsed <= 0) {
-    return DEFAULT_MESSAGE_PAGE_SIZE;
+    return MESSAGE_PAGE_SIZE;
   }
   return Math.min(parsed, MAX_LIMIT);
 }
