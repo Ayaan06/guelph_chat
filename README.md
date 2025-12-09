@@ -13,14 +13,15 @@ npm install
 2) Environment variables (`.env`):
 
 ```
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public&sslmode=require&pgbouncer=true&connection_limit=1"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public&sslmode=require"
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 NEXTAUTH_SECRET=generate-with: openssl rand -base64 32
 NEXTAUTH_URL=http://localhost:3000
 ```
 
-- For Vercel Postgres, copy the `Prisma` connection string from the dashboard and append `&pgbouncer=true&connection_limit=1` for serverless.
+- Prisma/NextAuth must use the direct Postgres host on port 5432. Do not point `DATABASE_URL` at the Supabase pooler/PgBouncer (port 6543), because Prisma requires a session connection per request.
+- If you keep a separate pooler URL for other tools, store it as `DATABASE_URL_POOLER` but never feed it to Prisma.
 
 3) Apply the Prisma schema to your database:
 

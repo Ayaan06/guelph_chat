@@ -10,6 +10,17 @@ const useRelaxedTls =
   process.env.PRISMA_INSECURE_TLS === "1" ||
   process.env.PRISMA_INSECURE_TLS === "true";
 
+function isPoolerUrl(urlString) {
+  if (!urlString) return false;
+  const url = new URL(urlString);
+  return (
+    url.hostname.includes("pooler.supabase.com") ||
+    url.port === "6543" ||
+    url.searchParams.get("pgbouncer") === "true" ||
+    url.searchParams.get("pooler") === "true"
+  );
+}
+
 // When using Supabase pooler, TLS verification can fail in CI.
 // Allow opting out via PRISMA_INSECURE_TLS to keep builds running.
 if (useRelaxedTls) {
@@ -48,6 +59,13 @@ async function main() {
 
   if (!connectionString) {
     console.warn("DATABASE_URL is missing; skipping Prisma migrations.");
+    return;
+  }
+
+  if (isPoolerUrl(connectionString)) {
+    console.warn(
+      "DATABASE_URL points to the Supabase pooler (port 6543); Prisma must run against the direct Postgres URL on 5432. Update DATABASE_URL before running migrations.",
+    );
     return;
   }
 
