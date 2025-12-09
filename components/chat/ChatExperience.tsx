@@ -219,7 +219,7 @@ export function ChatExperience({
       });
 
     return () => {
-      supabaseClient.removeChannel(channel);
+      supabaseClient?.removeChannel(channel);
       setIsRealtimeActive(false);
     };
   }, [activeCourse?.id]);

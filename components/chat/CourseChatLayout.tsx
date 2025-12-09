@@ -237,7 +237,7 @@ export function CourseChatLayout({
       });
 
     return () => {
-      supabaseClient.removeChannel(channel);
+      supabaseClient?.removeChannel(channel);
       setIsRealtimeActive(false);
     };
   }, [course.id]);
