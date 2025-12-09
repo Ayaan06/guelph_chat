@@ -9,6 +9,7 @@ generator client {
   engineType = "binary"
 }
 
+// After editing this file, run `npx prisma migrate dev --name add_credentials_auth`.
 datasource db {
   provider = "postgresql"
 }
@@ -22,6 +23,7 @@ model User {
   image          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  passwordHash   String?
   accounts       Account[]
   sessions       Session[]
 }

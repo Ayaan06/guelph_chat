@@ -62,7 +62,7 @@ export function SignOutButton() {
     <ActionButton
       onClick={() =>
         signOut({
-          callbackUrl: "/login",
+          callbackUrl: "/auth",
         })
       }
       variant="ghost"

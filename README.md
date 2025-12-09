@@ -1,6 +1,6 @@
-# Google login with NextAuth + Prisma
+# Google + credentials auth with NextAuth + Prisma
 
-Next.js App Router project wired to Google OAuth via NextAuth, persisting users/sessions/accounts with Prisma (Postgres-ready for Vercel).
+Next.js App Router project wired to Google OAuth and credentials sign-in via NextAuth, persisting users/sessions/accounts with Prisma (Postgres-ready for Vercel).
 
 ## Setup
 
@@ -26,6 +26,8 @@ NEXTAUTH_URL=http://localhost:3000
 
 ```bash
 npx prisma migrate dev --name init
+# After adding the credentials fields run:
+# npx prisma migrate dev --name add_credentials_auth
 ```
 
 4) Configure Google OAuth credentials (console.cloud.google.com):
@@ -40,12 +42,13 @@ npx prisma migrate dev --name init
 npm run dev
 ```
 
-Open `http://localhost:3000/login` to sign in with Google. Auth state is available server-side via `getServerSession` and client-side via `SessionProvider`.
+Open `http://localhost:3000/auth` to sign in with Google or credentials. Auth state is available server-side via `getServerSession` and client-side via `SessionProvider`.
 
 ## Key files
 
-- `app/api/auth/[...nextauth]/route.ts` – NextAuth handler using the Prisma adapter and Google provider.
-- `lib/auth.ts` – NextAuth options (providers, session strategy, callbacks).
+- `app/api/auth/[...nextauth]/route.ts` – NextAuth handler using the Prisma adapter.
+- `lib/auth.ts` – NextAuth options (Google + Credentials providers, session strategy, callbacks).
 - `prisma/schema.prisma` – Models for users, accounts, sessions, verification tokens.
-- `app/login/page.tsx` – Login screen with Google sign-in.
-- `app/page.tsx` – Authenticated landing page example that redirects to `/login` when signed out.
+- `app/auth/page.tsx` – Auth screen with Google + credentials tabs.
+- `app/page.tsx` – Public landing page with CTA to `/auth`.
+- `app/login/page.tsx` – Redirects legacy `/login` to `/auth`.

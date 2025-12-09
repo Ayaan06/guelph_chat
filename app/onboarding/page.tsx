@@ -14,7 +14,7 @@ export default async function OnboardingPage({
 
   const session = (await getServerSession(authOptions)) as AppSession | null;
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect("/auth");
   }
 
   const user = await prisma.user.findUnique({
@@ -35,7 +35,7 @@ export default async function OnboardingPage({
 
     const session = (await getServerSession(authOptions)) as AppSession | null;
     if (!session?.user?.id) {
-      redirect("/login");
+      redirect("/auth");
     }
 
     const username = formData.get("username")?.toString().trim();
