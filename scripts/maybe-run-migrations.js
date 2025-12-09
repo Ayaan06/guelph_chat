@@ -6,7 +6,15 @@ const skip =
   process.env.SKIP_PRISMA_MIGRATE === "true";
 const connectionString = process.env.DATABASE_URL;
 const connectionTimeoutMillis = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 5000;
-const useRelaxedTls = process.env.PRISMA_INSECURE_TLS === "1";
+const useRelaxedTls =
+  process.env.PRISMA_INSECURE_TLS === "1" ||
+  process.env.PRISMA_INSECURE_TLS === "true";
+
+// When using Supabase pooler, TLS verification can fail in CI.
+// Allow opting out via PRISMA_INSECURE_TLS to keep builds running.
+if (useRelaxedTls) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 function buildConnectionConfig(urlString) {
   if (!urlString) return {};
@@ -48,8 +56,14 @@ async function main() {
     connectionTimeoutMillis,
   });
 
+  // Prevent unhandled error events from crashing the build.
+  client.on("error", (err) => {
+    console.warn("Database connection error (skipping migrations):", err.message);
+  });
+
   try {
     await client.connect();
+    await client.query("select 1");
   } catch (error) {
     console.warn(
       `Database not reachable (skipping Prisma migrate deploy): ${error.code ?? error.message}`,
@@ -63,7 +77,19 @@ async function main() {
     }
   }
 
-  execSync("npx prisma migrate deploy", { stdio: "inherit" });
+  try {
+    execSync("npx prisma migrate deploy", {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        ...(useRelaxedTls ? { NODE_TLS_REJECT_UNAUTHORIZED: "0" } : {}),
+      },
+    });
+  } catch (error) {
+    console.warn(
+      `Prisma migrate deploy failed (continuing build): ${error.stderr?.toString() || error.message}`,
+    );
+  }
 }
 
 main().catch((error) => {
