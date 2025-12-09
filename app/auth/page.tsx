@@ -15,6 +15,7 @@ function AuthContent() {
     (searchParams.get("mode") as Mode) === "signup" ? "signup" : "login",
   );
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,7 @@ function AuthContent() {
       redirect: false,
       email,
       username: isSignup ? username : email,
+      name: isSignup ? name : undefined,
       password,
       action: isSignup ? "signup" : "login",
       callbackUrl: "/profile",
@@ -79,7 +81,7 @@ function AuthContent() {
 
   const handleGoogle = () => {
     setError(null);
-    signIn("google", { callbackUrl: "/onboarding" });
+    signIn("google", { callbackUrl: "/profile" });
   };
 
   if (status === "authenticated") {
@@ -202,6 +204,23 @@ function AuthContent() {
                     className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
                   />
                 </div>
+
+                {mode === "signup" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-white/90">
+                      Name
+                    </label>
+                    <input
+                      required
+                      minLength={2}
+                      maxLength={60}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      placeholder="Your name"
+                      className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
+                    />
+                  </div>
+                )}
 
                 {mode === "signup" && (
                   <div className="space-y-2">

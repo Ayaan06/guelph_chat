@@ -28,6 +28,7 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         username: { label: "Username", type: "text" },
+        name: { label: "Name", type: "text" },
         password: { label: "Password", type: "password" },
         action: { label: "Action", type: "hidden" },
       },
@@ -39,6 +40,7 @@ export const authOptions: AuthOptions = {
         const action = credentials.action === "signup" ? "signup" : "login";
         const email = credentials.email?.toLowerCase().trim();
         const username = credentials.username?.trim();
+        const name = credentials.name?.trim() || null;
         const password = credentials.password;
 
         if (!password) {
@@ -68,6 +70,7 @@ export const authOptions: AuthOptions = {
             data: {
               email,
               username,
+              name,
               passwordHash,
             },
           });
@@ -109,16 +112,59 @@ export const authOptions: AuthOptions = {
     signIn: "/auth",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      const dbUser = user as {
+        id: string;
+        username?: string | null;
+        email?: string | null;
+      };
+
+      if (account?.provider === "google" && !dbUser.username) {
+        const emailLocal = (dbUser.email ?? profile?.email ?? "")
+          .split("@")[0]
+          .replace(/[^a-zA-Z0-9_.]/g, "")
+          .slice(0, 24);
+        const base = emailLocal || "user";
+        let candidate = base;
+        let suffix = 0;
+
+        // Ensure uniqueness without hammering the DB.
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const existing = await prisma.user.findUnique({
+            where: { username: candidate },
+            select: { id: true },
+          });
+          if (!existing) break;
+          suffix += 1;
+          candidate = `${base}${suffix}`;
+        }
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { username: candidate },
+        });
+        dbUser.username = candidate;
+      }
+      return true;
+    },
     session: async ({
       session,
       user,
     }: {
       session: AppSession;
-      user: { id: string; username?: string | null };
+      user: {
+        id: string;
+        username?: string | null;
+        name?: string | null;
+        email?: string | null;
+      };
     }) => {
       if (session.user) {
         session.user.id = user.id;
         session.user.username = user.username ?? null;
+        session.user.name = user.name ?? session.user.name ?? null;
+        session.user.email = user.email ?? session.user.email ?? null;
       }
       return session;
     },
