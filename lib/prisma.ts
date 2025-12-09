@@ -23,6 +23,7 @@ const shouldUseSsl =
 
 const ssl = shouldUseSsl
   ? {
+      require: true,
       rejectUnauthorized: false,
     }
   : undefined;

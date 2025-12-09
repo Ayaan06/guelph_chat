@@ -6,6 +6,10 @@ import type { CourseSummary } from "@/types/chat";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
+// Prisma requires the Node runtime; keep this route fully dynamic.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export default async function ClassesPage() {
   const session = (await getServerSession(authOptions)) as AppSession | null;
 

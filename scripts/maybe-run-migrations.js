@@ -23,10 +23,11 @@ function buildConnectionConfig(urlString) {
     ssl:
       shouldUseSsl && useRelaxedTls
         ? {
+            require: true,
             rejectUnauthorized: false,
           }
         : shouldUseSsl
-          ? { rejectUnauthorized: false }
+          ? { require: true, rejectUnauthorized: false }
           : undefined,
   };
 }
