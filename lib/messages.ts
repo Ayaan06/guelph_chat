@@ -4,7 +4,7 @@ import { prisma } from "./prisma";
 import type { MessageDTO } from "@/types/chat";
 
 type MessageWithSender = Prisma.MessageGetPayload<{
-  include: { sender: { select: { id: true; name: true | null; email: true | null } } };
+  include: { sender: { select: { id: true; name: true; email: true } } };
 }>;
 
 export function mapMessageToDTO(message: MessageWithSender): MessageDTO {
