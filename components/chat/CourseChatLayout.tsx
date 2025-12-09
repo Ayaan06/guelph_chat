@@ -1,49 +1,303 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
-import { getMajorById } from "@/lib/mockData";
-import type { ClassMessage, Classmate, Course } from "@/lib/mockData";
+import { DEFAULT_MESSAGE_PAGE_SIZE } from "@/lib/messages";
+import { hasRealtimeEnv, supabaseClient } from "@/lib/supabaseClient";
+import type { ClassmateSummary, CourseSummary, MessageDTO } from "@/types/chat";
 
 type CourseChatLayoutProps = {
-  course: Course;
+  course: CourseSummary;
   majorName?: string;
-  messages: ClassMessage[];
-  classmates: Classmate[];
-  joinedCourses: Course[];
+  initialMessages?: MessageDTO[];
+  initialCursor?: string | null;
+  classmates: ClassmateSummary[];
+  joinedCourses: CourseSummary[];
   termLabel: string;
-  userName: string;
+  userId: string;
 };
+
+function sortMessages(messages: MessageDTO[]) {
+  return [...messages].sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+}
+
+function mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
+  const all = new Map<string, MessageDTO>();
+  current.forEach((message) => all.set(message.id, message));
+  incoming.forEach((message) => all.set(message.id, message));
+  return sortMessages(Array.from(all.values()));
+}
 
 export function CourseChatLayout({
   course,
   majorName,
-  messages,
+  initialMessages = [],
+  initialCursor = null,
   classmates,
   joinedCourses,
   termLabel,
-  userName,
+  userId,
 }: CourseChatLayoutProps) {
-  const coursesList = useMemo(
+  const [messages, setMessages] = useState<MessageDTO[]>(() =>
+    sortMessages(initialMessages),
+  );
+  const [nextCursor, setNextCursor] = useState<string | null>(initialCursor);
+  const [draft, setDraft] = useState("");
+  const [isLoading, setIsLoading] = useState(initialMessages.length === 0);
+  const [isPaginating, setIsPaginating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isRealtimeActive, setIsRealtimeActive] = useState(false);
+  const messageContainerRef = useRef<HTMLDivElement | null>(null);
+  const prependingRef = useRef(false);
+  const messagesInitializedRef = useRef(initialMessages.length > 0);
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const displayedMessages = useMemo(
+    () =>
+      messages.map((message) => ({
+        ...message,
+        isOwn: message.senderId === userId,
+      })),
+    [messages, userId],
+  );
+
+  const sidebarCourses = useMemo(
     () =>
       joinedCourses.map((joined) => ({
         ...joined,
-        majorName: getMajorById(joined.majorId)?.name,
         isActive: joined.id === course.id,
       })),
     [course.id, joinedCourses],
   );
 
-  const renderedMessages = useMemo(
-    () =>
-      messages.map((message) =>
-        message.isCurrentUser
-          ? { ...message, senderName: userName || "You" }
-          : message,
-      ),
-    [messages, userName],
-  );
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    const container = messageContainerRef.current;
+    if (!container) return;
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior,
+    });
+  };
+
+  useEffect(() => {
+    // Reset when course changes
+    setMessages(sortMessages(initialMessages));
+    setNextCursor(initialCursor);
+    setError(null);
+    setDraft("");
+    setIsLoading(initialMessages.length === 0);
+    messagesInitializedRef.current = initialMessages.length > 0;
+  }, [course.id, initialCursor, initialMessages]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+    if (prependingRef.current) {
+      prependingRef.current = false;
+      return;
+    }
+    scrollToBottom(messagesInitializedRef.current ? "smooth" : "auto");
+    messagesInitializedRef.current = true;
+  }, [messages.length, isLoading]);
+
+  const fetchLatest = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/messages?courseId=${course.id}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to load messages");
+      }
+
+      const data = (await response.json()) as {
+        messages: MessageDTO[];
+        nextCursor?: string | null;
+      };
+      setMessages(sortMessages(data.messages ?? []));
+      setNextCursor(data.nextCursor ?? null);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "Failed to load messages");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [course.id]);
+
+  const fetchOlder = async () => {
+    if (!nextCursor || isPaginating) return;
+    prependingRef.current = true;
+    setIsPaginating(true);
+    const container = messageContainerRef.current;
+    const previousHeight = container?.scrollHeight ?? 0;
+
+    try {
+      const response = await fetch(
+        `/api/messages?courseId=${course.id}&cursor=${nextCursor}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to load older messages");
+      }
+      const data = (await response.json()) as {
+        messages: MessageDTO[];
+        nextCursor?: string | null;
+      };
+      setMessages((prev) => mergeMessages(data.messages ?? [], prev));
+      setNextCursor(data.nextCursor ?? null);
+
+      requestAnimationFrame(() => {
+        if (!container) return;
+        const newHeight = container.scrollHeight;
+        container.scrollTop = newHeight - previousHeight;
+      });
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load older messages",
+      );
+    } finally {
+      setIsPaginating(false);
+    }
+  };
+
+  const refreshLatest = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/messages?courseId=${course.id}&limit=${DEFAULT_MESSAGE_PAGE_SIZE}`,
+      );
+      if (!response.ok) return;
+      const data = (await response.json()) as { messages: MessageDTO[] };
+      setMessages((prev) => mergeMessages(prev, data.messages ?? []));
+    } catch (err) {
+      console.error("Polling latest messages failed", err);
+    }
+  }, [course.id]);
+
+  useEffect(() => {
+    if (messagesInitializedRef.current) {
+      return;
+    }
+    fetchLatest();
+  }, [course.id, fetchLatest]);
+
+  useEffect(() => {
+    if (!hasRealtimeEnv || !supabaseClient) {
+      return;
+    }
+
+    const channel = supabaseClient
+      .channel(`messages-course-${course.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `courseId=eq.${course.id}`,
+        },
+        (payload) => {
+          const incoming = payload.new as {
+            id: string;
+            courseId: string;
+            senderId: string;
+            senderName?: string | null;
+            content: string;
+            createdAt?: string;
+          };
+
+          const message: MessageDTO = {
+            id: incoming.id,
+            courseId: incoming.courseId,
+            senderId: incoming.senderId,
+            senderName: incoming.senderName || "Classmate",
+            content: incoming.content,
+            createdAt:
+              incoming.createdAt ??
+              new Date().toISOString(),
+          };
+
+          setMessages((prev) => {
+            if (prev.some((item) => item.id === message.id)) {
+              return prev;
+            }
+            return sortMessages([...prev, message]);
+          });
+        },
+      )
+      .subscribe((status) => {
+        setIsRealtimeActive(status === "SUBSCRIBED");
+      });
+
+    return () => {
+      supabaseClient.removeChannel(channel);
+      setIsRealtimeActive(false);
+    };
+  }, [course.id]);
+
+  useEffect(() => {
+    if (hasRealtimeEnv && supabaseClient) {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+      return () => undefined;
+    }
+
+    pollTimerRef.current = setInterval(refreshLatest, 3000);
+
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    };
+  }, [course.id, refreshLatest]);
+
+  const handleSend = async () => {
+    const trimmed = draft.trim();
+    if (!trimmed || isSending) return;
+
+    setIsSending(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          courseId: course.id,
+          content: trimmed,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to send message");
+      }
+
+      const data = (await response.json()) as { message: MessageDTO };
+      setDraft("");
+
+      if (!hasRealtimeEnv || !supabaseClient) {
+        setMessages((prev) => mergeMessages(prev, [data.message]));
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : "Failed to send message");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -59,11 +313,11 @@ export function CourseChatLayout({
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
-              {coursesList.length}
+              {sidebarCourses.length}
             </span>
           </div>
           <div className="space-y-2">
-            {coursesList.map((joined) => {
+            {sidebarCourses.map((joined) => {
               const active = joined.isActive;
               return (
                 <Link
@@ -79,13 +333,11 @@ export function CourseChatLayout({
                     {joined.code}
                   </p>
                   <p className="text-sm font-semibold">{joined.name}</p>
-                  <p className="text-xs text-slate-500">
-                    {joined.majorName ?? joined.majorId.toUpperCase()}
-                  </p>
+                  <p className="text-xs text-slate-500">{joined.major}</p>
                 </Link>
               );
             })}
-            {coursesList.length === 0 && (
+            {sidebarCourses.length === 0 && (
               <p className="text-sm text-slate-600">
                 Join classes to see them here.
               </p>
@@ -103,44 +355,84 @@ export function CourseChatLayout({
                 {course.code} - {course.name}
               </h1>
               <p className="text-sm text-slate-600">
-                {majorName ?? course.majorId.toUpperCase()} | Level {course.level} |{" "}
-                {termLabel}
+                {majorName ?? course.major} | Level {course.level} | {termLabel}
+              </p>
+              <p className="text-xs text-slate-500">
+                {hasRealtimeEnv
+                  ? `Realtime ${isRealtimeActive ? "connected" : "connecting..."}` // uses Supabase if present
+                  : "Live updates via quick refresh"}
               </p>
             </div>
             <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 sm:block">
-              UI preview
+              Live messaging
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50/60 px-5 py-4">
-            {renderedMessages.map((message) => (
+          <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50/60 px-5 py-4" ref={messageContainerRef}>
+            {nextCursor && (
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={fetchOlder}
+                  disabled={isPaginating}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isPaginating ? "Loading..." : "Load older messages"}
+                </button>
+              </div>
+            )}
+
+            {isLoading && messages.length === 0 && (
+              <div className="flex items-center justify-center text-sm text-slate-600">
+                Loading messages...
+              </div>
+            )}
+
+            {!isLoading && messages.length === 0 && (
+              <div className="flex items-center justify-center text-sm text-slate-600">
+                No messages yet. Be the first to say hello!
+              </div>
+            )}
+
+            {displayedMessages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
           </div>
 
           <div className="border-t border-slate-200 px-5 py-4">
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-sm font-semibold text-slate-800">
-                Messaging coming soon
-              </p>
-              <p className="text-xs text-slate-600">
-                Draft a note to classmates. Sending is disabled in this preview.
-              </p>
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-semibold text-slate-800">
+                  Message
+                </label>
                 <textarea
-                  disabled
-                  placeholder="Messaging coming soon..."
-                  className="h-24 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder={`Message classmates in ${course.code}`}
+                  className="h-24 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  disabled={isSending}
                 />
+              </div>
+              <div className="flex items-center gap-2 self-start pt-7">
                 <button
                   type="button"
-                  disabled
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={handleSend}
+                  disabled={!draft.trim() || isSending}
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Send
+                  {isSending ? "Sending..." : "Send"}
                 </button>
               </div>
             </div>
+            {error && (
+              <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>
+            )}
           </div>
         </section>
 
@@ -161,7 +453,7 @@ export function CourseChatLayout({
               <div className="flex items-center justify-between">
                 <dt className="text-slate-600">Major</dt>
                 <dd className="font-semibold text-slate-900">
-                  {majorName ?? course.majorId.toUpperCase()}
+                  {majorName ?? course.major}
                 </dd>
               </div>
               <div className="flex items-center justify-between">
@@ -177,25 +469,21 @@ export function CourseChatLayout({
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-900">
-              Classmates online
+              Classmates
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-slate-800">
               {classmates.map((classmate) => (
                 <li
-                  key={`${classmate.name}-${classmate.year}`}
+                  key={classmate.id}
                   className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
                 >
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
                     <div>
                       <p className="font-semibold text-slate-900">
-                        {classmate.name}
+                        {classmate.name ?? "Classmate"}
                       </p>
-                      <p className="text-xs text-slate-600">
-                        {classmate.year} |{" "}
-                        {getMajorById(classmate.majorId)?.name ??
-                          classmate.majorId.toUpperCase()}
-                      </p>
+                      <p className="text-xs text-slate-600">Active</p>
                     </div>
                   </div>
                   <span className="text-[11px] font-semibold text-emerald-700">
@@ -203,6 +491,11 @@ export function CourseChatLayout({
                   </span>
                 </li>
               ))}
+              {classmates.length === 0 && (
+                <li className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                  No classmates listed yet.
+                </li>
+              )}
             </ul>
           </div>
         </aside>

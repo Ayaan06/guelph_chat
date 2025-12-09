@@ -2,12 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { CourseCard } from "./CourseCard";
-import type { Course, Major } from "@/lib/mockData";
-import { getMajorById } from "@/lib/mockData";
+import type { CourseSummary } from "@/types/chat";
+
+type Major = {
+  id: string;
+  name: string;
+};
 
 type BrowseClassesContentProps = {
   majors: Major[];
-  courses: Course[];
+  courses: CourseSummary[];
 };
 
 export function BrowseClassesContent({
@@ -21,7 +25,7 @@ export function BrowseClassesContent({
     const query = searchTerm.trim().toLowerCase();
     return courses.filter((course) => {
       const matchesMajor =
-        selectedMajor === "all" || course.majorId === selectedMajor;
+        selectedMajor === "all" || course.major === selectedMajor;
       const matchesQuery =
         query.length === 0 ||
         course.code.toLowerCase().includes(query) ||
@@ -36,7 +40,7 @@ export function BrowseClassesContent({
         .map((major) => ({
           major,
           courses: filteredCourses.filter(
-            (course) => course.majorId === major.id,
+            (course) => course.major === major.id,
           ),
         }))
         .filter((group) => group.courses.length > 0),
@@ -101,7 +105,7 @@ export function BrowseClassesContent({
                 <CourseCard
                   key={course.id}
                   course={course}
-                  majorName={getMajorById(course.majorId)?.name}
+                  majorName={group.major.name}
                   href={`/classes/${course.id}`}
                 />
               ))}

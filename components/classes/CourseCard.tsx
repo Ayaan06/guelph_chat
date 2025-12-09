@@ -1,8 +1,8 @@
 import Link from "next/link";
-import type { Course } from "@/lib/mockData";
+import type { CourseSummary } from "@/types/chat";
 
 type CourseCardProps = {
-  course: Course;
+  course: CourseSummary;
   majorName?: string;
   actionLabel?: string;
   href: string;
@@ -22,7 +22,7 @@ export function CourseCard({
             {course.code}
           </span>
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            {majorName ?? course.majorId.toUpperCase()}
+            {majorName ?? course.major}
           </span>
         </div>
         <h3 className="text-lg font-semibold text-slate-900">{course.name}</h3>

@@ -26,6 +26,8 @@ model User {
   passwordHash   String?
   accounts       Account[]
   sessions       Session[]
+  memberships    ClassMembership[]
+  messages       Message[]       @relation("UserMessages")
 }
 
 model Account {
@@ -63,4 +65,46 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@unique([token])
+}
+
+model Course {
+  id         String             @id @default(cuid())
+  code       String
+  name       String
+  major      String
+  level      Int
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  memberships ClassMembership[]
+  messages    Message[]
+
+  @@unique([code])
+  @@map("courses")
+}
+
+model ClassMembership {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String
+  joinedAt  DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@map("class_memberships")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId   String
+  sender     User     @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId   String
+  senderName String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([courseId, createdAt])
+  @@map("messages")
 }

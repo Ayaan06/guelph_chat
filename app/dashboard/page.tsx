@@ -1,11 +1,7 @@
 import { CourseCard } from "@/components/classes/CourseCard";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { authOptions, type AppSession } from "@/lib/auth";
-import {
-  getMajorById,
-  joinedCourses,
-  mockUserProfile,
-} from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,8 +13,24 @@ export default async function DashboardPage() {
     redirect("/auth");
   }
 
-  const userName = session.user?.name ?? mockUserProfile.name;
-  const userEmail = session.user?.email ?? mockUserProfile.email ?? undefined;
+  const memberships = await prisma.classMembership.findMany({
+    where: { userId: session.user.id },
+    include: { course: true },
+    orderBy: { joinedAt: "desc" },
+  });
+
+  const joinedCourses = memberships
+    .filter((membership) => membership.course)
+    .map(({ course }) => ({
+      id: course.id,
+      code: course.code,
+      name: course.name,
+      major: course.major,
+      level: course.level,
+    }));
+
+  const userName = session.user?.name ?? session.user?.email ?? "You";
+  const userEmail = session.user?.email ?? undefined;
   const greetingName = userName.split(" ")[0] || "Student";
 
   return (
@@ -82,7 +94,7 @@ export default async function DashboardPage() {
               <CourseCard
                 key={course.id}
                 course={course}
-                majorName={getMajorById(course.majorId)?.name}
+                majorName={course.major}
                 actionLabel="Go to chat"
                 href={`/classes/${course.id}`}
               />
