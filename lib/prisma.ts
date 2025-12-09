@@ -9,10 +9,29 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is required to initialize Prisma");
 }
 
+const connectionUrl = new URL(connectionString);
+const sslMode = connectionUrl.searchParams.get("sslmode");
+connectionUrl.searchParams.delete("sslmode");
+const sanitizedConnectionString = connectionUrl.toString();
+
+// Some managed Postgres providers (e.g. Supabase pooler) present a cert chain
+// that fails strict validation in local dev. Remove sslmode from the URL so we
+// can enforce a relaxed TLS config ourselves.
+const shouldUseSsl =
+  sslMode?.toLowerCase() !== "disable" &&
+  !["localhost", "127.0.0.1"].includes(connectionUrl.hostname);
+
+const ssl = shouldUseSsl
+  ? {
+      rejectUnauthorized: false,
+    }
+  : undefined;
+
 const adapter = new PrismaPg(
   new Pool({
-    connectionString,
+    connectionString: sanitizedConnectionString,
     max: 5,
+    ssl,
   }),
 );
 
