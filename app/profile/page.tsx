@@ -1,7 +1,8 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { authOptions, type AppSession } from "@/lib/auth";
-import { getMajorById, majors, mockUserProfile } from "@/lib/mockData";
+import { getMajorById, majors, type UserProfile } from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
@@ -11,13 +12,26 @@ export default async function ProfilePage() {
     redirect("/auth");
   }
 
-  const userName = session.user.name ?? mockUserProfile.name;
-  const userEmail = session.user.email ?? mockUserProfile.email ?? undefined;
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      email: true,
+      majorId: true,
+      year: true,
+      interests: true,
+    },
+  });
 
-  const profile = {
-    ...mockUserProfile,
+  const userName = user?.name ?? session.user.name ?? session.user.email ?? "";
+  const userEmail = user?.email ?? session.user.email ?? undefined;
+
+  const profile: UserProfile = {
     name: userName,
     email: userEmail,
+    majorId: user?.majorId ?? "",
+    year: user?.year ?? "",
+    interests: user?.interests ?? [],
   };
 
   return (
@@ -34,7 +48,7 @@ export default async function ProfilePage() {
             <p className="text-sm text-slate-600">{userEmail}</p>
           ) : null}
           <p className="mt-2 text-sm text-slate-600">
-            Customize your details. Saving is mocked locally for now.
+            Customize your details. Changes save to your account.
           </p>
         </div>
 
@@ -49,17 +63,24 @@ export default async function ProfilePage() {
                 <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                   <dt className="text-slate-600">Major</dt>
                   <dd className="font-semibold">
-                    {getMajorById(profile.majorId)?.name ?? "Undeclared"}
+                    {profile.majorId
+                      ? getMajorById(profile.majorId)?.name ??
+                        "Other / Interdisciplinary"
+                      : "Not set"}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                   <dt className="text-slate-600">Year</dt>
-                  <dd className="font-semibold">{profile.year}</dd>
+                  <dd className="font-semibold">
+                    {profile.year || "Not set"}
+                  </dd>
                 </div>
                 <div className="flex items-start justify-between rounded-lg bg-slate-50 px-3 py-2">
                   <dt className="text-slate-600">Interests</dt>
                   <dd className="max-w-[220px] text-right font-semibold">
-                    {profile.interests.join(", ")}
+                    {profile.interests.length
+                      ? profile.interests.join(", ")
+                      : "Not set"}
                   </dd>
                 </div>
               </dl>

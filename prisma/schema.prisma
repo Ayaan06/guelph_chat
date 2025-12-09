@@ -24,6 +24,9 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   passwordHash   String?
+  majorId        String?
+  year           String?
+  interests      String[]  @default([])
   accounts       Account[]
   sessions       Session[]
   memberships    ClassMembership[]
