@@ -42,6 +42,12 @@ export function TopNav({ onMenuToggle, userName, userEmail }: TopNavProps) {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/chat"
+            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 sm:inline-flex"
+          >
+            Messages
+          </Link>
+          <Link
             href="/classes"
             className="hidden rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 sm:inline-flex"
           >
