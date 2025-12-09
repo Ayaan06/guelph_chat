@@ -81,7 +81,7 @@ function AuthContent() {
 
   const handleGoogle = () => {
     setError(null);
-    signIn("google", { callbackUrl: "/profile" });
+    signIn("google", { callbackUrl: "/onboarding" });
   };
 
   if (status === "authenticated") {

@@ -112,42 +112,6 @@ export const authOptions: AuthOptions = {
     signIn: "/auth",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      const dbUser = user as {
-        id: string;
-        username?: string | null;
-        email?: string | null;
-      };
-
-      if (account?.provider === "google" && !dbUser.username) {
-        const emailLocal = (dbUser.email ?? profile?.email ?? "")
-          .split("@")[0]
-          .replace(/[^a-zA-Z0-9_.]/g, "")
-          .slice(0, 24);
-        const base = emailLocal || "user";
-        let candidate = base;
-        let suffix = 0;
-
-        // Ensure uniqueness without hammering the DB.
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const existing = await prisma.user.findUnique({
-            where: { username: candidate },
-            select: { id: true },
-          });
-          if (!existing) break;
-          suffix += 1;
-          candidate = `${base}${suffix}`;
-        }
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { username: candidate },
-        });
-        dbUser.username = candidate;
-      }
-      return true;
-    },
     session: async ({
       session,
       user,
