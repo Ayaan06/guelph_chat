@@ -34,12 +34,7 @@ const adapter = new PrismaPg(
   new Pool({
     connectionString: parsedDbUrl.toString(),
     max: 5,
-    ssl: shouldUseSsl
-      ? {
-          require: true,
-          rejectUnauthorized: false,
-        }
-      : undefined,
+    ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
   }),
 );
 
