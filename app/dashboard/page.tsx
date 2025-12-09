@@ -1,11 +1,11 @@
-import { AppLayout } from "@/components/layout/AppLayout";
 import { CourseCard } from "@/components/classes/CourseCard";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { authOptions, type AppSession } from "@/lib/auth";
 import {
   getMajorById,
   joinedCourses,
   mockUserProfile,
 } from "@/lib/mockData";
-import { authOptions, type AppSession } from "@/lib/auth";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -101,18 +101,14 @@ export default async function DashboardPage() {
                 className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-blue-200 hover:bg-blue-50"
               >
                 Browse classes
-                <span aria-hidden className="text-base">
-                  →
-                </span>
+                <span aria-hidden className="text-base">-&gt;</span>
               </Link>
               <Link
                 href="/profile"
                 className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-blue-200 hover:bg-blue-50"
               >
                 Edit profile
-                <span aria-hidden className="text-base">
-                  →
-                </span>
+                <span aria-hidden className="text-base">-&gt;</span>
               </Link>
             </div>
           </div>
