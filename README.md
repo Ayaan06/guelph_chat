@@ -44,6 +44,13 @@ npm run dev
 
 Open `http://localhost:3000/auth` to sign in with Google or credentials. Auth state is available server-side via `getServerSession` and client-side via `SessionProvider`.
 
+## Deploy/build notes
+
+- `npm run build` now runs `node scripts/maybe-run-migrations.js` before `next build`.
+- The script attempts `prisma migrate deploy` only when `DATABASE_URL` is reachable; otherwise it logs and continues so Vercel builds don't fail when the database is offline.
+- Set `SKIP_PRISMA_MIGRATE=1` in environments where you want to skip migrations during the build, and run `npx prisma migrate deploy` manually once the database is reachable.
+- Use `DB_CONNECT_TIMEOUT_MS` (milliseconds) to tweak how long the reachability probe waits before skipping.
+
 ## Key files
 
 - `app/api/auth/[...nextauth]/route.ts` – NextAuth handler using the Prisma adapter.
