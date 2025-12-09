@@ -25,6 +25,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
     redirect("/auth");
   }
 
+  if (!params?.courseId) {
+    redirect("/classes");
+  }
+
   const userId = session.user.id;
 
   const course = await prisma.course.findUnique({
