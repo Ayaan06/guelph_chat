@@ -5,6 +5,9 @@ import { MESSAGE_PAGE_SIZE } from "@/lib/chatConfig";
 import { getServerSession } from "next-auth";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Prisma requires the Node runtime
+export const runtime = "nodejs";
+
 const MAX_LIMIT = 100;
 
 function parseLimit(value: string | null): number {

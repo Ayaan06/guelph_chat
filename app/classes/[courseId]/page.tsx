@@ -6,6 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
+// Ensure this route always executes on the Node runtime (not edge) because it uses Prisma.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type CoursePageProps = {
   params: {
     courseId: string;
