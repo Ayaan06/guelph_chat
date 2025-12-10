@@ -106,7 +106,7 @@ export function BrowseClassesContent({
                   key={course.id}
                   course={course}
                   majorName={group.major.name}
-                  href={`/classes/${course.id}`}
+                  href={`/chat?courseId=${course.id}`}
                 />
               ))}
             </div>
