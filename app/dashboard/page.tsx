@@ -96,7 +96,7 @@ export default async function DashboardPage() {
                 course={course}
                 majorName={course.major}
                 actionLabel="Go to chat"
-                href={`/chat?courseId=${course.id}`}
+                href={`/classes/${course.id}`}
               />
             ))}
           </div>
