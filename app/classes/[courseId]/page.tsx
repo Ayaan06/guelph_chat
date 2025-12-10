@@ -93,6 +93,23 @@ export default async function CoursePage({ params }: CoursePageProps) {
       level: course.level,
     }));
 
+  const courseIdsForCounts = Array.from(
+    new Set([...joinedCourses.map((item) => item.id), course.id]),
+  );
+  const memberCounts = await prisma.classMembership.groupBy({
+    by: ["courseId"],
+    where: { courseId: { in: courseIdsForCounts } },
+    _count: { courseId: true },
+  });
+  const memberCountMap = new Map(
+    memberCounts.map((entry) => [entry.courseId, entry._count.courseId]),
+  );
+
+  const joinedCoursesWithCounts = joinedCourses.map((item) => ({
+    ...item,
+    memberCount: memberCountMap.get(item.id) ?? 0,
+  }));
+
   const classmates = classmatesRaw
     .filter((member) => member.userId !== userId)
     .map((member) => ({
@@ -108,19 +125,20 @@ export default async function CoursePage({ params }: CoursePageProps) {
       <CourseChatLayout
         course={{
           id: course.id,
-          code: course.code,
-          name: course.name,
-          major: course.major,
-          level: course.level,
-        }}
-        majorName={course.major}
-        initialMessages={initialMessages.messages}
-        initialCursor={initialMessages.nextCursor}
-        classmates={classmates}
-        joinedCourses={joinedCourses}
-        termLabel={TERM_LABEL}
-        userId={userId}
-      />
+      code: course.code,
+      name: course.name,
+      major: course.major,
+      level: course.level,
+      memberCount: memberCountMap.get(course.id) ?? 0,
+    }}
+    majorName={course.major}
+    initialMessages={initialMessages.messages}
+    initialCursor={initialMessages.nextCursor}
+    classmates={classmates}
+    joinedCourses={joinedCoursesWithCounts}
+    termLabel={TERM_LABEL}
+    userId={userId}
+  />
     </AppLayout>
   );
 }

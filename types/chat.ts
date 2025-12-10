@@ -13,6 +13,8 @@ export type CourseSummary = {
   name: string;
   major: string;
   level: number;
+  memberCount?: number;
+  termLabel?: string;
 };
 
 export type ClassmateSummary = {

@@ -10,6 +10,8 @@ import { redirect } from "next/navigation";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const TERM_LABEL = "Fall 2025";
+
 export default async function ClassesPage() {
   const session = (await getServerSession(authOptions)) as AppSession | null;
 
@@ -19,6 +21,11 @@ export default async function ClassesPage() {
 
   const courses = await prisma.course.findMany({
     orderBy: { code: "asc" },
+    include: {
+      _count: {
+        select: { memberships: true },
+      },
+    },
   });
 
   const courseSummaries: CourseSummary[] = courses.map((course) => ({
@@ -27,6 +34,8 @@ export default async function ClassesPage() {
     name: course.name,
     major: course.major,
     level: course.level,
+    memberCount: course._count.memberships,
+    termLabel: TERM_LABEL,
   }));
 
   const majors = Array.from(

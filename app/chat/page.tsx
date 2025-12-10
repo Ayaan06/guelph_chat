@@ -14,6 +14,8 @@ type ChatPageProps = {
   };
 };
 
+const TERM_LABEL = "Fall 2025";
+
 export default async function ChatPage({ searchParams }: ChatPageProps) {
   const session = (await getServerSession(authOptions)) as AppSession | null;
 
@@ -79,7 +81,9 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
     joinedCourses.unshift(requestedCourse);
   }
 
-  const hasGlobal = joinedCourses.some((course) => course.id === GLOBAL_COURSE.id);
+  const hasGlobal = joinedCourses.some(
+    (course) => course.id === GLOBAL_COURSE.id,
+  );
   const coursesWithGlobal = hasGlobal
     ? joinedCourses
     : [
@@ -93,46 +97,128 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
         ...joinedCourses,
       ];
 
+  const courseIdsForCounts = coursesWithGlobal.map((course) => course.id);
+  const memberCounts = await prisma.classMembership.groupBy({
+    by: ["courseId"],
+    where: { courseId: { in: courseIdsForCounts } },
+    _count: { courseId: true },
+  });
+  const memberCountMap = new Map(
+    memberCounts.map((entry) => [entry.courseId, entry._count.courseId]),
+  );
+
+  const coursesWithMeta = coursesWithGlobal.map((course) => ({
+    ...course,
+    memberCount: memberCountMap.get(course.id) ?? 1,
+    termLabel: TERM_LABEL,
+  }));
+
   const userName = session.user?.name ?? session.user?.email ?? "You";
   const userEmail = session.user?.email ?? undefined;
 
   return (
     <AppLayout userName={userName} userEmail={userEmail}>
-      <div className="space-y-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-blue-600">
-                Start texting
+      <div className="space-y-8">
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 shadow-xl">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                Step 1 · Landing
               </p>
-              <h1 className="text-3xl font-semibold text-slate-900">
-                Join a class chat
+              <h1 className="text-3xl font-semibold leading-tight text-white">
+                One flow: land, discover, and chat with your class.
               </h1>
-              <p className="text-sm text-slate-600">
-                Pick one of your classes and text classmates in a focused chat room.
+              <p className="text-sm text-slate-300">
+                Start here, hop to discovery, then drop into realtime chat. We
+                enroll you automatically so the left sidebar and chat room stay
+                in sync.
               </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/classes"
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Discover classes (Step 2)
+                </Link>
+                <Link
+                  href="/dashboard#your-classes"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Dashboard shortcuts
+                </Link>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/classes"
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-              >
-                Browse classes
-              </Link>
-              <Link
-                href="/dashboard#your-classes"
-                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-              >
-                Back to dashboard
-              </Link>
+            <div className="grid w-full max-w-md grid-cols-3 gap-3 rounded-2xl bg-white/10 p-4 text-center text-xs font-semibold text-white shadow-inner backdrop-blur lg:max-w-lg">
+              <div className="space-y-1 rounded-xl bg-white/10 px-3 py-2">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200">
+                  Step 1
+                </p>
+                <p>Landing</p>
+                <p className="text-[11px] text-slate-300">
+                  Orientation & next CTA
+                </p>
+              </div>
+              <div className="space-y-1 rounded-xl bg-white/10 px-3 py-2">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200">
+                  Step 2
+                </p>
+                <p>Discover</p>
+                <p className="text-[11px] text-slate-300">Filter & join</p>
+              </div>
+              <div className="space-y-1 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md">
+                <p className="text-[11px] uppercase tracking-[0.14em] text-blue-600">
+                  Step 3
+                </p>
+                <p>Chat</p>
+                <p className="text-[11px] text-slate-500">Realtime room</p>
+              </div>
             </div>
           </div>
         </section>
 
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+              Step 1
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">
+              Landing
+            </h2>
+            <p className="text-sm text-slate-600">
+              You&apos;re here. Quick summary, next CTA, and your chats ready in
+              the sidebar.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+              Step 2
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">
+              Discover
+            </h2>
+            <p className="text-sm text-slate-600">
+              Browse &ldquo;Discover classes&rdquo; to search, filter, and join.
+              Joining instantly enrolls and redirects you into chat.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+              Step 3
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-900">
+              Chat
+            </h2>
+            <p className="text-sm text-slate-600">
+              Realtime chat with sticky course header, improved bubbles, and a
+              premium composer.
+            </p>
+          </div>
+        </section>
+
         <ChatExperience
-          courses={coursesWithGlobal}
+          courses={coursesWithMeta}
           userId={session.user.id}
-          initialCourseId={requestedCourse?.id ?? coursesWithGlobal[0]?.id}
+          initialCourseId={requestedCourse?.id ?? coursesWithMeta[0]?.id}
         />
       </div>
     </AppLayout>

@@ -56,6 +56,8 @@ export function CourseChatLayout({
   const prependingRef = useRef(false);
   const messagesInitializedRef = useRef(initialMessages.length > 0);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [courseFilter, setCourseFilter] = useState("");
+  const [hoveredCourseId, setHoveredCourseId] = useState<string | null>(null);
 
   const displayedMessages = useMemo(
     () =>
@@ -74,6 +76,19 @@ export function CourseChatLayout({
       })),
     [course.id, joinedCourses],
   );
+
+  const filteredSidebarCourses = useMemo(() => {
+    const query = courseFilter.trim().toLowerCase();
+    if (!query) return sidebarCourses;
+    return sidebarCourses.filter(
+      (item) =>
+        item.code.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query) ||
+        item.major.toLowerCase().includes(query),
+    );
+  }, [courseFilter, sidebarCourses]);
+
+  const enrollmentCount = course.memberCount ?? classmates.length + 1;
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     const container = messageContainerRef.current;
@@ -301,184 +316,299 @@ export function CourseChatLayout({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[240px,1fr,280px]">
-        <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
+      <div className="grid gap-5 xl:grid-cols-[280px,1fr,320px]">
+        <aside className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
                 Your classes
               </p>
               <p className="text-sm font-semibold text-slate-900">
                 Stay in sync
               </p>
+              <p className="text-xs text-slate-600">
+                Hover for details, click to switch instantly.
+              </p>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
-              {sidebarCourses.length}
-            </span>
+            <Link
+              href="/classes"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            >
+              + Join
+            </Link>
           </div>
-          <div className="space-y-2">
-            {sidebarCourses.map((joined) => {
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+            <span className="text-xs font-semibold text-slate-600">Search</span>
+            <input
+              value={courseFilter}
+              onChange={(event) => setCourseFilter(event.target.value)}
+              placeholder="Code, name, or major"
+              className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+            />
+          </div>
+          <div className="mt-3 space-y-2">
+            {filteredSidebarCourses.length === 0 && (
+              <p className="text-sm text-slate-600">
+                No classes match. Try another keyword.
+              </p>
+            )}
+            {filteredSidebarCourses.map((joined) => {
               const active = joined.isActive;
+              const isGlobal =
+                joined.id === "global-chat" ||
+                joined.code.toLowerCase() === "global";
               return (
                 <Link
                   key={joined.id}
                   href={`/classes/${encodeURIComponent(joined.id)}`}
-                  className={`block rounded-xl border px-3 py-2 transition ${
+                  onMouseEnter={() => setHoveredCourseId(joined.id)}
+                  onMouseLeave={() => setHoveredCourseId(null)}
+                  className={`group relative block overflow-visible rounded-2xl border px-3 py-3 transition ${
                     active
-                      ? "border-blue-200 bg-blue-50 text-blue-800"
-                      : "border-slate-200 bg-white text-slate-800 hover:border-blue-200 hover:bg-slate-50"
-                  }`}
+                      ? "border-slate-900 bg-slate-900 text-white shadow-md"
+                      : "border-slate-200 bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
+                  } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    {joined.code}
-                  </p>
-                  <p className="text-sm font-semibold">{joined.name}</p>
-                  <p className="text-xs text-slate-500">{joined.major}</p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p
+                        className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                          active ? "text-slate-200" : "text-slate-500"
+                        }`}
+                      >
+                        {isGlobal ? "Global chat" : joined.code}
+                      </p>
+                      <p className="text-sm font-semibold">{joined.name}</p>
+                      <p
+                        className={`text-xs ${
+                          active ? "text-slate-300" : "text-slate-500"
+                        }`}
+                      >
+                        {joined.major} • Level {joined.level}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {!active && (
+                        <span
+                          className="h-2.5 w-2.5 rounded-full bg-emerald-500"
+                          title="Unread indicator"
+                          aria-hidden
+                        />
+                      )}
+                      <span
+                        className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                          active
+                            ? "bg-white/10 text-white"
+                            : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {joined.memberCount ?? 0} in room
+                      </span>
+                    </div>
+                  </div>
+                  {hoveredCourseId === joined.id && (
+                    <div className="pointer-events-none absolute inset-x-0 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-lg">
+                      <p className="font-semibold text-slate-900">
+                        {joined.code} — {joined.name}
+                      </p>
+                      <p className="mt-1 text-slate-600">
+                        {joined.major} · Level {joined.level}
+                      </p>
+                    </div>
+                  )}
                 </Link>
               );
             })}
-            {sidebarCourses.length === 0 && (
-              <p className="text-sm text-slate-600">
-                Join classes to see them here.
-              </p>
-            )}
           </div>
         </aside>
 
-        <section className="flex min-h-[540px] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
+        <section className="relative flex min-h-[580px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-600">
-                Class chat
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+                Class chat · Step 3
               </p>
               <h1 className="text-2xl font-semibold text-slate-900">
-                {course.code} - {course.name}
+                {course.code} — {course.name}
               </h1>
               <p className="text-sm text-slate-600">
-                {majorName ?? course.major} | Level {course.level} | {termLabel}
+                {majorName ?? course.major} · Level {course.level} · {termLabel}
               </p>
-              <p className="text-xs text-slate-500">
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-800">
+                {enrollmentCount} enrolled
+              </span>
+              <span
+                className={`rounded-full px-3 py-1 ${
+                  isRealtimeActive
+                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
+                    : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
+                }`}
+              >
                 {hasRealtimeEnv
-                  ? `Realtime ${isRealtimeActive ? "connected" : "connecting..."}` // uses Supabase if present
-                  : "Live updates via quick refresh"}
-              </p>
-            </div>
-            <div className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 sm:block">
-              Live messaging
+                  ? isRealtimeActive
+                    ? "Realtime connected"
+                    : "Connecting…"
+                  : "Live via quick refresh"}
+              </span>
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50/60 px-5 py-4" ref={messageContainerRef}>
-            {nextCursor && (
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={fetchOlder}
-                  disabled={isPaginating}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isPaginating ? "Loading..." : "Load older messages"}
-                </button>
-              </div>
-            )}
+          <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.08),transparent_22%)]" />
+            <div
+              className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
+              ref={messageContainerRef}
+            >
+              {nextCursor && (
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={fetchOlder}
+                    disabled={isPaginating}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isPaginating ? "Loading..." : "Load older messages"}
+                  </button>
+                </div>
+              )}
 
-            {isLoading && messages.length === 0 && (
-              <div className="flex items-center justify-center text-sm text-slate-600">
-                Loading messages...
-              </div>
-            )}
+              {isLoading && messages.length === 0 && (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
+                    <div className="h-10 w-10 animate-pulse rounded-full bg-slate-100" />
+                    Loading messages...
+                  </div>
+                </div>
+              )}
 
-            {!isLoading && messages.length === 0 && (
-              <div className="flex items-center justify-center text-sm text-slate-600">
-                No messages yet. Be the first to say hello!
-              </div>
-            )}
+              {!isLoading && messages.length === 0 && (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
+                    <div className="h-12 w-12 rounded-2xl bg-slate-100" />
+                    <p className="font-semibold text-slate-900">
+                      No messages yet.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Start the chat — classmates will see it instantly.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            {displayedMessages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
+              {displayedMessages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+            </div>
           </div>
 
-          <div className="border-t border-slate-200 px-5 py-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <div className="border-t border-slate-200 bg-white px-6 py-4">
+            <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
+              <span>Message</span>
+              <span className="text-xs text-slate-500">
+                Enter to send · Shift+Enter for newline
+              </span>
+            </div>
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
               <div className="flex-1 space-y-2">
-                <label className="text-sm font-semibold text-slate-800">
-                  Message
-                </label>
-                <textarea
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                      event.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  placeholder={`Message classmates in ${course.code}`}
-                  className="h-24 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
-                  disabled={isSending}
-                />
+                <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-inner">
+                  <button
+                    type="button"
+                    className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed"
+                    aria-label="Attach (coming soon)"
+                    disabled
+                  >
+                    📎
+                  </button>
+                  <textarea
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        handleSend();
+                      }
+                    }}
+                    rows={3}
+                    placeholder={`Message classmates in ${course.code}`}
+                    className="h-24 w-full resize-none bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
+                    disabled={isSending}
+                  />
+                </div>
+                {error && (
+                  <p className="text-xs font-semibold text-rose-600">{error}</p>
+                )}
               </div>
-              <div className="flex items-center gap-2 self-start pt-7">
+              <div className="flex items-center gap-2 self-start">
                 <button
                   type="button"
                   onClick={handleSend}
                   disabled={!draft.trim() || isSending}
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  {isSending ? "Sending..." : "Send"}
+                  {isSending ? "Sending..." : "Send message"}
                 </button>
               </div>
             </div>
-            {error && (
-              <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>
-            )}
           </div>
         </section>
 
-        <aside className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 className="text-sm font-semibold text-slate-900">Class info</h3>
-            <dl className="mt-3 space-y-2 text-sm text-slate-700">
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-600">Course</dt>
+        <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Class snapshot
+            </h3>
+            <dl className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-700">
+              <div className="space-y-1 rounded-xl bg-white px-3 py-2 shadow-sm">
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                  Course
+                </dt>
                 <dd className="font-semibold text-slate-900">{course.code}</dd>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-600">Name</dt>
-                <dd className="max-w-[160px] text-right font-semibold text-slate-900">
-                  {course.name}
-                </dd>
+              <div className="space-y-1 rounded-xl bg-white px-3 py-2 shadow-sm">
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                  Level
+                </dt>
+                <dd className="font-semibold text-slate-900">{course.level}</dd>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-600">Major</dt>
+              <div className="space-y-1 rounded-xl bg-white px-3 py-2 shadow-sm">
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                  Major
+                </dt>
                 <dd className="font-semibold text-slate-900">
                   {majorName ?? course.major}
                 </dd>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-600">Level</dt>
-                <dd className="font-semibold text-slate-900">{course.level}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-600">Term</dt>
+              <div className="space-y-1 rounded-xl bg-white px-3 py-2 shadow-sm">
+                <dt className="text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                  Term
+                </dt>
                 <dd className="font-semibold text-slate-900">{termLabel}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Classmates
-            </h3>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Classmates
+              </h3>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
+                {classmates.length} listed
+              </span>
+            </div>
             <ul className="mt-3 space-y-2 text-sm text-slate-800">
               {classmates.map((classmate) => (
                 <li
                   key={classmate.id}
-                  className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
+                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 shadow-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                    <span
+                      className="h-2.5 w-2.5 rounded-full bg-emerald-500"
+                      aria-hidden
+                    />
                     <div>
                       <p className="font-semibold text-slate-900">
                         {classmate.name ?? "Classmate"}
@@ -492,7 +622,7 @@ export function CourseChatLayout({
                 </li>
               ))}
               {classmates.length === 0 && (
-                <li className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                <li className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600 shadow-sm">
                   No classmates listed yet.
                 </li>
               )}
