@@ -9,6 +9,7 @@ import type { CourseSummary, MessageDTO } from "@/types/chat";
 type ChatExperienceProps = {
   courses: CourseSummary[];
   userId: string;
+  initialCourseId?: string;
 };
 
 function sortMessages(messages: MessageDTO[]) {
@@ -28,10 +29,17 @@ function mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
 export function ChatExperience({
   courses,
   userId,
+  initialCourseId,
 }: ChatExperienceProps) {
-  const [selectedCourseId, setSelectedCourseId] = useState(
-    courses[0]?.id ?? "",
-  );
+  const [selectedCourseId, setSelectedCourseId] = useState(() => {
+    if (
+      initialCourseId &&
+      courses.some((course) => course.id === initialCourseId)
+    ) {
+      return initialCourseId;
+    }
+    return courses[0]?.id ?? "";
+  });
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -59,6 +67,31 @@ export function ChatExperience({
       })),
     [messages, userId],
   );
+
+  useEffect(() => {
+    const matchesInitial =
+      initialCourseId &&
+      courses.some((course) => course.id === initialCourseId);
+    const hasSelected = courses.some(
+      (course) => course.id === selectedCourseId,
+    );
+
+    if (matchesInitial && selectedCourseId !== initialCourseId) {
+      setSelectedCourseId(initialCourseId);
+      return;
+    }
+
+    if (!hasSelected) {
+      const fallbackId = courses[0]?.id ?? "";
+      if (fallbackId !== selectedCourseId) {
+        setSelectedCourseId(fallbackId);
+      }
+    }
+
+    if (courses.length === 0 && selectedCourseId !== "") {
+      setSelectedCourseId("");
+    }
+  }, [courses, initialCourseId, selectedCourseId]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     const container = containerRef.current;

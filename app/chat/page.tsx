@@ -3,11 +3,18 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { authOptions, type AppSession } from "@/lib/auth";
 import { ensureGlobalCourseAndMembership, GLOBAL_COURSE } from "@/lib/globalCourse";
 import { prisma } from "@/lib/prisma";
+import type { CourseSummary } from "@/types/chat";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function ChatPage() {
+type ChatPageProps = {
+  searchParams?: {
+    courseId?: string;
+  };
+};
+
+export default async function ChatPage({ searchParams }: ChatPageProps) {
   const session = (await getServerSession(authOptions)) as AppSession | null;
 
   if (!session?.user?.id) {
@@ -15,6 +22,39 @@ export default async function ChatPage() {
   }
 
   await ensureGlobalCourseAndMembership(session.user.id);
+
+  const requestedCourseId = searchParams?.courseId;
+  let requestedCourse: CourseSummary | null = null;
+
+  if (requestedCourseId) {
+    const course = await prisma.course.findUnique({
+      where: { id: requestedCourseId },
+    });
+
+    if (course) {
+      await prisma.classMembership.upsert({
+        where: {
+          userId_courseId: {
+            userId: session.user.id,
+            courseId: course.id,
+          },
+        },
+        update: {},
+        create: {
+          userId: session.user.id,
+          courseId: course.id,
+        },
+      });
+
+      requestedCourse = {
+        id: course.id,
+        code: course.code,
+        name: course.name,
+        major: course.major,
+        level: course.level,
+      };
+    }
+  }
 
   const memberships = await prisma.classMembership.findMany({
     where: { userId: session.user.id },
@@ -31,6 +71,13 @@ export default async function ChatPage() {
       major: course.major,
       level: course.level,
     }));
+
+  if (
+    requestedCourse &&
+    !joinedCourses.some((course) => course.id === requestedCourse?.id)
+  ) {
+    joinedCourses.unshift(requestedCourse);
+  }
 
   const hasGlobal = joinedCourses.some((course) => course.id === GLOBAL_COURSE.id);
   const coursesWithGlobal = hasGlobal
@@ -82,7 +129,11 @@ export default async function ChatPage() {
           </div>
         </section>
 
-        <ChatExperience courses={coursesWithGlobal} userId={session.user.id} />
+        <ChatExperience
+          courses={coursesWithGlobal}
+          userId={session.user.id}
+          initialCourseId={requestedCourse?.id ?? coursesWithGlobal[0]?.id}
+        />
       </div>
     </AppLayout>
   );
