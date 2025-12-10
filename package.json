@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "node scripts/maybe-run-migrations.js && next build",
     "start": "next start",
+    "seed:courses": "node scripts/seed-courses.js",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },
@@ -28,6 +29,7 @@
     "@types/pg": "^8.15.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "prisma": "^7.1.0",

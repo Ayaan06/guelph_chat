@@ -22,6 +22,7 @@ NEXTAUTH_URL=http://localhost:3000
 
 - Prisma/NextAuth must use the direct Postgres host on port 5432. Do not point `DATABASE_URL` at the Supabase pooler/PgBouncer (port 6543), because Prisma requires a session connection per request.
 - If you keep a separate pooler URL for other tools, store it as `DATABASE_URL_POOLER` but never feed it to Prisma.
+- In production set `NEXTAUTH_URL` to your canonical domain. Current deployment: `https://gryphchat.com`.
 
 3) Apply the Prisma schema to your database:
 
@@ -31,13 +32,19 @@ npx prisma migrate dev --name init
 # npx prisma migrate dev --name add_credentials_auth
 ```
 
-4) Configure Google OAuth credentials (console.cloud.google.com):
+4) Seed the course catalog (reads `full_course_offerings.json` and upserts into `Course`):
+
+```bash
+npm run seed:courses
+```
+
+5) Configure Google OAuth credentials (console.cloud.google.com):
 
 - Create OAuth Client ID (Web).
 - Authorized redirect URI (local): `http://localhost:3000/api/auth/callback/google`
-- On Vercel: `https://your-domain.vercel.app/api/auth/callback/google`
+- Production: `https://gryphchat.com/api/auth/callback/google`
 
-5) Run locally:
+6) Run locally:
 
 ```bash
 npm run dev
