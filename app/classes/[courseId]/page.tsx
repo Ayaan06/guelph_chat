@@ -29,11 +29,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
     redirect("/classes");
   }
 
+  const courseIdParam = decodeURIComponent(params.courseId);
   const userId = session.user.id;
 
-  const course = await prisma.course.findUnique({
-    where: { id: params.courseId },
+  let course = await prisma.course.findUnique({
+    where: { id: courseIdParam },
   });
+
+  // Support linking by course code in case the URL contains the human-readable code.
+  if (!course) {
+    course = await prisma.course.findUnique({
+      where: { code: courseIdParam },
+    });
+  }
 
   if (!course) {
     redirect("/classes");

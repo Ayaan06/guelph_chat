@@ -107,7 +107,7 @@ export function BrowseClassesContent({
                   course={course}
                   majorName={group.major.name}
                   actionLabel="Join class chat"
-                  href={`/classes/${course.id}`}
+                  href={`/classes/${encodeURIComponent(course.id)}`}
                 />
               ))}
             </div>

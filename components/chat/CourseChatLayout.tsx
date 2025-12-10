@@ -322,7 +322,7 @@ export function CourseChatLayout({
               return (
                 <Link
                   key={joined.id}
-                  href={`/classes/${joined.id}`}
+                  href={`/classes/${encodeURIComponent(joined.id)}`}
                   className={`block rounded-xl border px-3 py-2 transition ${
                     active
                       ? "border-blue-200 bg-blue-50 text-blue-800"
