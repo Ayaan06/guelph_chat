@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CourseSummary } from "@/types/chat";
 
 type CourseCardProps = {
@@ -6,6 +7,8 @@ type CourseCardProps = {
   onJoin?: (course: CourseSummary) => void;
   isJoining?: boolean;
   accent?: "blue" | "emerald" | "indigo";
+  actionLabel?: string;
+  href?: string;
 };
 
 const accentStyles: Record<
@@ -23,8 +26,11 @@ export function CourseCard({
   onJoin,
   isJoining,
   accent = "blue",
+  actionLabel = "Open class",
+  href,
 }: CourseCardProps) {
   const memberLabel = `${course.memberCount ?? 0} enrolled`;
+  const showJoin = Boolean(onJoin);
 
   return (
     <div
@@ -64,24 +70,33 @@ export function CourseCard({
           <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />
           <span>Live chat ready</span>
         </div>
-        <button
-          type="button"
-          onClick={() => onJoin?.(course)}
-          disabled={isJoining}
-          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:translate-y-[-1px] hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          {isJoining ? (
-            <>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-              Joining...
-            </>
-          ) : (
-            <>
-              <span className="text-base">+</span>
-              Join &amp; open chat
-            </>
-          )}
-        </button>
+        {showJoin ? (
+          <button
+            type="button"
+            onClick={() => onJoin?.(course)}
+            disabled={isJoining}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:translate-y-[-1px] hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {isJoining ? (
+              <>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+                Joining...
+              </>
+            ) : (
+              <>
+                <span className="text-base">+</span>
+                Join &amp; open chat
+              </>
+            )}
+          </button>
+        ) : (
+          <Link
+            href={href ?? "#"}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:translate-y-[-1px] hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+          >
+            {actionLabel}
+          </Link>
+        )}
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-6 bg-gradient-to-t from-slate-50/90 via-transparent to-transparent opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100" />
