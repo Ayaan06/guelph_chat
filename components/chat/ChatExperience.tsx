@@ -61,6 +61,22 @@ export function ChatExperience({
   const [courseFilter, setCourseFilter] = useState("");
   const [hoveredCourseId, setHoveredCourseId] = useState<string | null>(null);
   const [hasAppliedInitial, setHasAppliedInitial] = useState(false);
+  const [profileModal, setProfileModal] = useState<{
+    userId: string;
+    senderName: string;
+    loading: boolean;
+    error: string | null;
+    profile:
+      | {
+          name: string;
+          email?: string;
+          majorId?: string;
+          majorName?: string;
+          year?: string;
+          interests?: string[];
+        }
+      | null;
+  } | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const prependingRef = useRef(false);
@@ -75,6 +91,54 @@ export function ChatExperience({
       })),
     [messages, userId],
   );
+
+  const handleShowProfile = async (targetUserId: string, senderName: string) => {
+    setProfileModal({
+      userId: targetUserId,
+      senderName,
+      loading: true,
+      error: null,
+      profile: null,
+    });
+
+    try {
+      const response = await fetch(`/api/profile/${encodeURIComponent(targetUserId)}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to load profile");
+      }
+      const data = (await response.json()) as {
+        profile?: {
+          name: string;
+          email?: string;
+          majorId?: string;
+          majorName?: string;
+          year?: string;
+          interests?: string[];
+        };
+      };
+
+      setProfileModal((prev) =>
+        prev
+          ? {
+              ...prev,
+              loading: false,
+              profile: data.profile ?? null,
+            }
+          : prev,
+      );
+    } catch (err) {
+      setProfileModal((prev) =>
+        prev
+          ? {
+              ...prev,
+              loading: false,
+              error: err instanceof Error ? err.message : "Failed to load profile",
+            }
+          : prev,
+      );
+    }
+  };
 
   const filteredCourses = useMemo(() => {
     const query = courseFilter.trim().toLowerCase();
@@ -558,7 +622,11 @@ export function ChatExperience({
             )}
 
             {displayedMessages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <ChatMessage
+                key={message.id}
+                message={message}
+                onShowProfile={handleShowProfile}
+              />
             ))}
           </div>
         </div>
@@ -620,5 +688,85 @@ export function ChatExperience({
         </div>
       </section>
     </div>
+
+      {profileModal && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setProfileModal(null)}
+              className="absolute right-3 top-3 text-slate-500 hover:text-slate-900"
+              aria-label="Close profile"
+            >
+              ×
+            </button>
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-600">
+                Classmate profile
+              </p>
+              <h3 className="text-xl font-semibold text-slate-900">
+                {profileModal.profile?.name ?? profileModal.senderName}
+              </h3>
+              <p className="text-sm text-slate-600">
+                {profileModal.loading
+                  ? "Loading profile..."
+                  : profileModal.profile?.email ?? "Email hidden"}
+              </p>
+            </div>
+
+            {profileModal.error && (
+              <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+                {profileModal.error}
+              </p>
+            )}
+
+            {!profileModal.error && (
+              <dl className="mt-4 space-y-3 text-sm text-slate-700">
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-500">Major</dt>
+                  <dd className="font-semibold text-slate-900">
+                    {profileModal.profile?.majorName ??
+                      profileModal.profile?.majorId ??
+                      "Not set"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-500">Year</dt>
+                  <dd className="font-semibold text-slate-900">
+                    {profileModal.profile?.year ?? "Not set"}
+                  </dd>
+                </div>
+                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-500">Interests</dt>
+                  <dd className="mt-1 flex flex-wrap gap-2">
+                    {profileModal.profile?.interests?.length ? (
+                      profileModal.profile.interests.map((interest) => (
+                        <span
+                          key={interest}
+                          className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-800 shadow-sm"
+                        >
+                          {interest}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-500">No interests listed</span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+            )}
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setProfileModal(null)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
   );
 }
