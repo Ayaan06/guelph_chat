@@ -20,16 +20,22 @@ export function ChatMessage({ message, onShowProfile }: ChatMessageProps) {
     day: "numeric",
   }).format(timestamp);
 
+  const sender = onShowProfile ? (
+    <button
+      type="button"
+      onClick={() => onShowProfile(message.senderId, message.senderName)}
+      className="font-semibold text-slate-700 underline-offset-4 hover:text-blue-700 hover:underline"
+    >
+      {message.senderName}
+    </button>
+  ) : (
+    <span className="font-semibold text-slate-700">{message.senderName}</span>
+  );
+
   return (
     <div className={`flex flex-col gap-1 ${alignment}`}>
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-slate-500">
-        <button
-          type="button"
-          onClick={() => onShowProfile?.(message.senderId, message.senderName)}
-          className="font-semibold text-slate-700 underline-offset-4 hover:text-blue-700 hover:underline"
-        >
-          {message.senderName}
-        </button>
+        {sender}
         <span className="rounded-full bg-slate-100 px-2 py-0.5">
           {formattedDate}
         </span>
