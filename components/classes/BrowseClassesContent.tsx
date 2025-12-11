@@ -123,7 +123,7 @@ export function BrowseClassesContent({
             </p>
             <div className="flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
               <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
-                Guided flow: Landing -> Discover -> Chat
+                Guided flow: Landing {`->`} Discover {`->`} Chat
               </span>
               <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
                 Live-ready chats
