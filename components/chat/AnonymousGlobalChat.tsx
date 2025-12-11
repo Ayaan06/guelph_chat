@@ -133,7 +133,6 @@ export function AnonymousGlobalChat() {
   };
 
   useEffect(() => {
-    // Assign a lightweight anonymous handle per visit.
     const saved =
       typeof window !== "undefined"
         ? sessionStorage.getItem("globalAnonName")
@@ -261,26 +260,37 @@ export function AnonymousGlobalChat() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-4 text-white shadow-xl shadow-indigo-900/30">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-indigo-400/10" />
+    <div className="relative overflow-hidden rounded-3xl border theme-hero-card p-4 text-[color:var(--hero-text)] shadow-xl shadow-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
+      <div
+        className="absolute inset-0 opacity-90"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 15% 18%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 32%), radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--accent-strong) 14%, transparent) 0%, transparent 28%)",
+        }}
+      />
       <div className="relative flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="space-y-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
               Global chat (anonymous)
             </p>
-            <h3 className="text-lg font-semibold">Say hi before logging in</h3>
-            <p className="text-xs text-indigo-50/80">
-              You&apos;re chatting as <span className="font-semibold text-white">{alias}</span>.
-              Messages are visible to everyone.
+            <h3 className="text-lg font-semibold text-[color:var(--hero-text)]">
+              Say hi before logging in
+            </h3>
+            <p className="text-xs text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
+              You&apos;re chatting as {" "}
+              <span className="font-semibold text-[color:var(--hero-text)]">
+                {alias}
+              </span>
+              . Messages are visible to everyone.
             </p>
           </div>
-          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">
+          <span className="inline-flex items-center rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_70%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--hero-text)]">
             Open
           </span>
         </div>
 
-        <div className="flex flex-col gap-2 rounded-2xl border border-white/15 bg-slate-950/40 p-3 shadow-inner backdrop-blur">
+        <div className="flex flex-col gap-2 rounded-2xl border border-[var(--border-soft)] bg-[color-mix(in_srgb,var(--card)_85%,transparent)] p-3 shadow-inner backdrop-blur">
           <div className="h-72 space-y-4 overflow-y-auto pr-1" ref={containerRef}>
             {nextCursor && (
               <div className="flex justify-center">
@@ -288,7 +298,7 @@ export function AnonymousGlobalChat() {
                   type="button"
                   onClick={loadOlder}
                   disabled={isPaginating}
-                  className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-100 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-full border border-[var(--border-soft)] bg-[var(--card-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--page-foreground)] transition hover:-translate-y-0.5 hover:bg-[var(--card)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isPaginating ? "Loading..." : "Load older messages"}
                 </button>
@@ -297,8 +307,8 @@ export function AnonymousGlobalChat() {
 
             {isLoading && (
               <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-indigo-50/80">
-                  <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
+                <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--border-soft)] bg-[var(--card-soft)] px-5 py-4 text-sm text-[color:var(--muted)]">
+                  <div className="h-10 w-10 animate-pulse rounded-full bg-[var(--glass-10)]" />
                   Loading global chat...
                 </div>
               </div>
@@ -306,12 +316,12 @@ export function AnonymousGlobalChat() {
 
             {!isLoading && displayed.length === 0 && (
               <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-indigo-50/80">
-                  <div className="h-12 w-12 rounded-2xl bg-white/10" />
-                  <p className="font-semibold text-white">
+                <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--border-soft)] bg-[var(--card-soft)] px-5 py-4 text-sm text-[color:var(--muted)]">
+                  <div className="h-12 w-12 rounded-2xl bg-[var(--glass-10)]" />
+                  <p className="font-semibold text-[color:var(--page-foreground)]">
                     Be the first to drop a message.
                   </p>
-                  <p className="text-xs text-indigo-100/80">
+                  <p className="text-xs text-[color:var(--muted)]">
                     You will show up as Anonymous.
                   </p>
                 </div>
@@ -335,22 +345,22 @@ export function AnonymousGlobalChat() {
               }}
               rows={3}
               placeholder="Chat as Anonymous..."
-              className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-indigo-100/70 focus:border-white/30"
+              className="w-full resize-none rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
               disabled={isSending}
             />
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-indigo-100/80">
-              <span>Enter to send â€¢ Shift+Enter for newline</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[color:var(--muted)]">
+              <span>Enter to send • Shift+Enter for newline</span>
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={!draft.trim() || isSending}
-                className="inline-flex h-10 items-center justify-center rounded-xl bg-white px-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-900 shadow transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--accent)] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSending ? "Sending..." : "Send as Anonymous"}
               </button>
             </div>
             {error && (
-              <p className="text-xs font-semibold text-rose-200">{error}</p>
+              <p className="text-xs font-semibold text-rose-400">{error}</p>
             )}
           </div>
         </div>

@@ -455,8 +455,14 @@ export function CourseChatLayout({
             </div>
           </div>
 
-          <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.08),transparent_22%)]" />
+          <div className="relative flex-1 overflow-hidden theme-panel-gradient">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 25%), radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--accent-strong) 10%, transparent) 0%, transparent 20%), radial-gradient(circle at 50% 80%, color-mix(in srgb, #10b981 10%, transparent) 0%, transparent 22%)",
+              }}
+            />
             <div
               className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
               ref={messageContainerRef}

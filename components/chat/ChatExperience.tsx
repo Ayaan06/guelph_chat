@@ -491,7 +491,7 @@ export function ChatExperience({
                             isActive ? "text-slate-300" : "text-slate-500"
                           }`}
                         >
-                          {course.major} • Level {course.level}
+                          {course.major} â€¢ Level {course.level}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -518,10 +518,10 @@ export function ChatExperience({
                     {hoveredCourseId === course.id && (
                       <div className="pointer-events-none absolute inset-x-0 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-lg">
                         <p className="font-semibold text-slate-900">
-                          {course.code} — {course.name}
+                          {course.code} â€” {course.name}
                         </p>
                         <p className="mt-1 text-slate-600">
-                          {course.termLabel ?? "Current term"} · {course.major}
+                          {course.termLabel ?? "Current term"} Â· {course.major}
                         </p>
                       </div>
                     )}
@@ -539,11 +539,11 @@ export function ChatExperience({
           <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
             <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-                Class chat · Step 3
+                Class chat Â· Step 3
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {activeCourse
-                  ? `${activeCourse.code} — ${activeCourse.name}`
+                  ? `${activeCourse.code} â€” ${activeCourse.name}`
                   : "Select a class"}
               </h2>
               <p className="text-sm text-slate-600">
@@ -570,8 +570,14 @@ export function ChatExperience({
             </div>
           </div>
 
-          <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.08),transparent_22%)]" />
+          <div className="relative flex-1 overflow-hidden theme-panel-gradient">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 25%), radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--accent-strong) 10%, transparent) 0%, transparent 20%), radial-gradient(circle at 50% 80%, color-mix(in srgb, #10b981 10%, transparent) 0%, transparent 22%)",
+              }}
+            />
             <div
               className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
               ref={containerRef}
@@ -606,7 +612,7 @@ export function ChatExperience({
                       No messages yet.
                     </p>
                     <p className="text-xs text-slate-500">
-                      Start the chat — everyone will see it instantly.
+                      Start the chat â€” everyone will see it instantly.
                     </p>
                   </div>
                 </div>

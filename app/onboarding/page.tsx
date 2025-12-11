@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { authOptions, type AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -67,17 +68,27 @@ export default async function OnboardingPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-16">
-        <div className="w-full max-w-xl space-y-8 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-blue-900/40 backdrop-blur">
+    <main className="relative min-h-screen theme-hero text-[color:var(--hero-text)]">
+      <div
+        className="absolute inset-0 opacity-80"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 32%), radial-gradient(circle at 82% 6%, color-mix(in srgb, var(--accent-strong) 14%, transparent) 0%, transparent 28%)",
+        }}
+      />
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-16">
+        <div className="w-full max-w-xl space-y-8 rounded-3xl border border-[var(--hero-card-border)] bg-[var(--hero-card-bg)] p-8 shadow-2xl backdrop-blur">
           <header className="space-y-2 text-center">
-            <p className="text-xs uppercase tracking-[0.2em] text-blue-100">
+            <p className="text-xs uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--hero-text)_65%,transparent)]">
               Finish setup
             </p>
-            <h1 className="text-3xl font-semibold text-white">
+            <h1 className="text-3xl font-semibold text-[color:var(--hero-text)]">
               Choose a username
             </h1>
-            <p className="text-sm text-blue-100/80">
+            <p className="text-sm text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
               We&apos;ll store it with your Google account so others can see
               your handle.
             </p>
@@ -85,7 +96,7 @@ export default async function OnboardingPage({
 
           <form action={saveProfile} className="space-y-5">
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-white/90">
+              <label className="block text-sm font-semibold text-[color:var(--hero-text)]">
                 Username
               </label>
               <input
@@ -93,29 +104,29 @@ export default async function OnboardingPage({
                 required
                 minLength={3}
                 maxLength={30}
-                pattern="[A-Za-z0-9_\\.]+"
+                pattern="[A-Za-z0-9_.]+"
                 defaultValue={user?.username ?? ""}
-                className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-300 focus:bg-white/15"
+                className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                 placeholder="e.g. guelph_user"
               />
-              <p className="text-xs text-blue-100/70">
+              <p className="text-xs text-[color-mix(in_srgb,var(--hero-text)_65%,transparent)]">
                 Letters, numbers, underscores, and dots only.
               </p>
               {error && (
-                <p className="text-sm font-medium text-red-300">
+                <p className="text-sm font-medium text-rose-300">
                   That username is taken. Try another.
                 </p>
               )}
             </div>
 
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-white/90">
+              <label className="block text-sm font-semibold text-[color:var(--hero-text)]">
                 Display name (optional)
               </label>
               <input
                 name="name"
                 defaultValue={user?.name ?? ""}
-                className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-300 focus:bg-white/15"
+                className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                 placeholder="Your name"
               />
             </div>
@@ -123,14 +134,14 @@ export default async function OnboardingPage({
             <div className="pt-2">
               <button
                 type="submit"
-                className="flex w-full items-center justify-center rounded-full bg-blue-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
+                className="flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[color-mix(in_srgb,var(--accent)_28%,transparent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_90%,var(--accent-strong))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
               >
                 Save and continue
               </button>
             </div>
           </form>
 
-          <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-xs text-blue-100/70">
+          <div className="rounded-2xl border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_75%,transparent)] p-4 text-xs text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
             Signed in as {user?.email ?? "your Google account"}.
           </div>
         </div>

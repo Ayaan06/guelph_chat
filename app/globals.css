@@ -1,26 +1,242 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --page-bg: #f6f8fb;
+  --page-foreground: #0f172a;
+  --muted: #4b5563;
+  --muted-strong: #111827;
+  --card: #ffffff;
+  --card-soft: #f8fafc;
+  --border-soft: #e5e7eb;
+  --border-strong: #e2e8f0;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --pill: rgba(37, 99, 235, 0.12);
+  --glass-5: rgba(15, 23, 42, 0.04);
+  --glass-10: rgba(15, 23, 42, 0.08);
+  --glass-15: rgba(15, 23, 42, 0.12);
+  --panel-gradient: linear-gradient(180deg, #f8fafc 0%, #ffffff 40%, #f8fafc 100%);
+  --hero-gradient: radial-gradient(circle at 18% 18%, rgba(37, 99, 235, 0.12), transparent 32%),
+    radial-gradient(circle at 82% 0%, rgba(14, 165, 233, 0.16), transparent 28%),
+    linear-gradient(135deg, #eef2ff 0%, #e0f2fe 45%, #e6efff 100%);
+  --hero-text: #0b1220;
+  --hero-card-bg: rgba(255, 255, 255, 0.82);
+  --hero-card-border: rgba(148, 163, 184, 0.4);
+  --hero-pill: rgba(37, 99, 235, 0.14);
+  --card-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+  --nav-glass: color-mix(in srgb, var(--card) 92%, transparent);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #0b1220;
+  --page-foreground: #e2e8f0;
+  --muted: #94a3b8;
+  --muted-strong: #cbd5e1;
+  --card: #0f172a;
+  --card-soft: #111827;
+  --border-soft: #1e293b;
+  --border-strong: #1f2937;
+  --accent: #60a5fa;
+  --accent-strong: #3b82f6;
+  --pill: rgba(96, 165, 250, 0.16);
+  --glass-5: rgba(255, 255, 255, 0.04);
+  --glass-10: rgba(255, 255, 255, 0.08);
+  --glass-15: rgba(255, 255, 255, 0.12);
+  --panel-gradient: linear-gradient(180deg, #0f172a 0%, #0f172a 45%, #0b1220 100%);
+  --hero-gradient: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.16), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(99, 102, 241, 0.16), transparent 28%),
+    linear-gradient(145deg, #0b1220 0%, #0f172a 45%, #0b193b 100%);
+  --hero-text: #e7ecff;
+  --hero-card-bg: rgba(17, 24, 39, 0.8);
+  --hero-card-border: rgba(255, 255, 255, 0.08);
+  --hero-pill: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.6);
+  --nav-glass: color-mix(in srgb, var(--card) 88%, transparent);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--page-bg);
+  --color-foreground: var(--page-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--page-bg);
+  color: var(--page-foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+a {
+  color: inherit;
+}
+
+.theme-page {
+  background: var(--page-bg);
+  color: var(--page-foreground);
+}
+
+.theme-card {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--card-shadow);
+  color: inherit;
+}
+
+.theme-subtle {
+  background: var(--card-soft);
+  border: 1px solid var(--border-soft);
+}
+
+.theme-muted {
+  color: var(--muted);
+}
+
+.theme-pill {
+  background: var(--pill);
+  color: var(--page-foreground);
+}
+
+.theme-input {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  color: var(--page-foreground);
+}
+
+.theme-hero {
+  background-image: var(--hero-gradient);
+  color: var(--hero-text);
+}
+
+.theme-panel-gradient {
+  background-image: var(--panel-gradient);
+  background-color: var(--card-soft);
+}
+
+.theme-glass {
+  background: var(--glass-10);
+  border: 1px solid var(--border-soft);
+}
+
+.theme-nav {
+  background: var(--nav-glass);
+  color: var(--page-foreground);
+}
+
+.theme-hero-card {
+  background: var(--hero-card-bg);
+  border: 1px solid var(--hero-card-border);
+  color: var(--hero-text);
+}
+
+.theme-hero-pill {
+  background: var(--hero-pill);
+  color: var(--hero-text);
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--card) !important;
+}
+
+[data-theme="dark"] .bg-white\\/90 {
+  background-color: color-mix(in srgb, var(--card) 90%, transparent) !important;
+}
+
+[data-theme="dark"] .bg-white\\/95 {
+  background-color: color-mix(in srgb, var(--card) 95%, transparent) !important;
+}
+
+[data-theme="dark"] .bg-white\\/5 {
+  background-color: var(--glass-5) !important;
+}
+
+[data-theme="dark"] .bg-white\\/10 {
+  background-color: var(--glass-10) !important;
+}
+
+[data-theme="dark"] .bg-white\\/15,
+[data-theme="dark"] .bg-white\\/20 {
+  background-color: var(--glass-15) !important;
+}
+
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] .bg-slate-100 {
+  background-color: var(--card-soft) !important;
+}
+
+[data-theme="dark"] .bg-slate-900 {
+  background-color: #0d162b !important;
+}
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800 {
+  color: var(--page-foreground) !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600 {
+  color: var(--muted) !important;
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-slate-400 {
+  color: color-mix(in srgb, var(--muted) 80%, var(--page-foreground)) !important;
+}
+
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100 {
+  border-color: var(--border-strong) !important;
+}
+
+[data-theme="dark"] .border-white\\/10,
+[data-theme="dark"] .border-white\\/15,
+[data-theme="dark"] .border-white\\/30 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .bg-blue-50 {
+  background-color: color-mix(in srgb, var(--accent) 18%, transparent) !important;
+  color: #dbeafe;
+}
+
+[data-theme="dark"] .text-blue-900 {
+  color: #dbeafe !important;
+}
+
+[data-theme="dark"] .border-blue-100 {
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent) !important;
+}
+
+[data-theme="dark"] .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #bbf7d0;
+}
+
+[data-theme="dark"] .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fde68a;
+}
+
+[data-theme="dark"] .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+  color: #fecdd3;
+}
+
+[data-theme="dark"] .border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--card);
+  border-color: var(--border-soft);
+  color: var(--page-foreground);
+}
+
+[data-theme="dark"] ::placeholder {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
 }

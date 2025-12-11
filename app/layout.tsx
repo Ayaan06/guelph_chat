@@ -3,6 +3,19 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
+const themeInitScript = `(function() {
+  try {
+    const stored = window.localStorage.getItem('campuschat-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+  } catch (err) {
+    console.warn('Theme init failed', err);
+  }
+})();`;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,8 +38,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased theme-page`}
       >
         <Providers>{children}</Providers>
       </body>

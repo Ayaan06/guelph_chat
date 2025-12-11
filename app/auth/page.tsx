@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 type Mode = "login" | "signup";
 
@@ -90,65 +91,85 @@ function AuthContent() {
 
   if (status === "authenticated") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-900 text-white">
-        <div className="rounded-3xl border border-white/10 bg-white/5 px-8 py-6 text-center shadow-2xl shadow-indigo-900/40 backdrop-blur">
-          <p className="text-xs uppercase tracking-[0.18em] text-indigo-100">
+      <main className="flex min-h-screen items-center justify-center theme-hero text-[color:var(--hero-text)]">
+        <div className="rounded-3xl border border-[var(--hero-card-border)] bg-[var(--hero-card-bg)] px-8 py-6 text-center shadow-2xl backdrop-blur">
+          <p className="text-xs uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
             Logged in
           </p>
-          <p className="mt-2 text-lg font-semibold">Redirecting to your page...</p>
+          <p className="mt-2 text-lg font-semibold text-[color:var(--hero-text)]">
+            Redirecting to your page...
+          </p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-900 text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-10 px-6 py-12 lg:flex-row lg:items-center">
+    <main className="relative min-h-screen theme-hero text-[color:var(--hero-text)]">
+      <div
+        className="absolute inset-0 opacity-80"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 32%), radial-gradient(circle at 82% 6%, color-mix(in srgb, var(--accent-strong) 14%, transparent) 0%, transparent 28%)",
+        }}
+      />
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center gap-10 px-6 py-12 lg:flex-row lg:items-center">
         <section className="space-y-6 lg:w-1/2">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100 shadow-lg shadow-indigo-900/30 backdrop-blur">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_70%,transparent)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--hero-text)] shadow-lg shadow-[color-mix(in_srgb,var(--accent)_18%,transparent)] backdrop-blur">
             Authentication
           </p>
           <div className="space-y-4">
-            <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
+            <h1 className="text-4xl font-semibold leading-tight text-[color:var(--hero-text)] sm:text-5xl">
               Sign in with Google or credentials.
             </h1>
-            <p className="text-lg text-slate-200/80">
+            <p className="text-lg text-[color-mix(in_srgb,var(--hero-text)_75%,transparent)]">
               Keep every account in the same database via NextAuth, Prisma, and
               Supabase Postgres. Choose Google OAuth or create a username and
               password to continue.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-indigo-50/80">
-            <span className="rounded-full border border-white/15 px-3 py-1">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[color-mix(in_srgb,var(--hero-text)_65%,transparent)]">
+            <span className="rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_65%,transparent)] px-3 py-1">
               Google OAuth
             </span>
-            <span className="rounded-full border border-white/15 px-3 py-1">
+            <span className="rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_65%,transparent)] px-3 py-1">
               Credentials + bcrypt
             </span>
-            <span className="rounded-full border border-white/15 px-3 py-1">
+            <span className="rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_65%,transparent)] px-3 py-1">
               Prisma adapter
             </span>
           </div>
         </section>
 
-        <section className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-indigo-900/40 backdrop-blur">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-indigo-400/10" />
+        <section className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-[var(--hero-card-border)] bg-[var(--hero-card-bg)] p-8 shadow-2xl backdrop-blur">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent)",
+            }}
+          />
           <div className="relative space-y-6">
             <header className="space-y-2">
-              <p className="text-sm uppercase tracking-[0.18em] text-indigo-100">
+              <p className="text-sm uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
                 {mode === "login" ? "Log in" : "Sign up"}
               </p>
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-2xl font-semibold text-[color:var(--hero-text)]">
                 {heading.title}
               </h2>
-              <p className="text-sm text-slate-100/75">{heading.subtitle}</p>
+              <p className="text-sm text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
+                {heading.subtitle}
+              </p>
             </header>
 
             <div className="space-y-4">
               <button
                 type="button"
                 onClick={handleGoogle}
-                className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/30 transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+                className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-[var(--border-soft)] bg-[var(--card)] text-sm font-semibold text-[color:var(--page-foreground)] shadow-lg shadow-[color-mix(in_srgb,var(--accent)_15%,transparent)] transition hover:bg-[var(--card-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
               >
                 <svg
                   viewBox="0 0 48 48"
@@ -177,13 +198,13 @@ function AuthContent() {
                 Continue with Google
               </button>
 
-              <div className="flex items-center gap-3 text-xs text-slate-200/70">
-                <span className="h-px flex-1 bg-white/20" />
+              <div className="flex items-center gap-3 text-xs text-[color-mix(in_srgb,var(--hero-text)_60%,transparent)]">
+                <span className="h-px flex-1 bg-[var(--hero-card-border)]" />
                 or
-                <span className="h-px flex-1 bg-white/20" />
+                <span className="h-px flex-1 bg-[var(--hero-card-border)]" />
               </div>
 
-              <div className="flex rounded-full bg-white/5 p-1 text-sm font-semibold text-white">
+              <div className="flex rounded-full bg-[color-mix(in_srgb,var(--hero-card-bg)_70%,transparent)] p-1 text-sm font-semibold text-[color:var(--hero-text)]">
                 {(["login", "signup"] as Mode[]).map((item) => (
                   <button
                     key={item}
@@ -194,8 +215,8 @@ function AuthContent() {
                     }}
                     className={`flex-1 rounded-full px-4 py-2 transition ${
                       mode === item
-                        ? "bg-white text-slate-900 shadow"
-                        : "text-indigo-50/80 hover:text-white"
+                        ? "bg-[var(--card)] text-[color:var(--page-foreground)] shadow"
+                        : "text-[color-mix(in_srgb,var(--hero-text)_75%,transparent)] hover:text-[color:var(--hero-text)]"
                     }`}
                   >
                     {item === "login" ? "Log in" : "Sign up"}
@@ -205,7 +226,7 @@ function AuthContent() {
 
               <form onSubmit={handleCredentials} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white/90">
+                  <label className="text-sm font-semibold text-[color:var(--hero-text)]">
                     {mode === "login" ? "Email or username" : "Email"}
                   </label>
                   <input
@@ -214,13 +235,13 @@ function AuthContent() {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
-                    className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
+                    className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                   />
                 </div>
 
                 {mode === "signup" && (
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-white/90">
+                    <label className="text-sm font-semibold text-[color:var(--hero-text)]">
                       Name
                     </label>
                     <input
@@ -230,14 +251,14 @@ function AuthContent() {
                       value={name}
                       onChange={(event) => setName(event.target.value)}
                       placeholder="Your name"
-                      className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
+                      className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                     />
                   </div>
                 )}
 
                 {mode === "signup" && (
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-white/90">
+                    <label className="text-sm font-semibold text-[color:var(--hero-text)]">
                       Username
                     </label>
                     <input
@@ -247,13 +268,13 @@ function AuthContent() {
                       value={username}
                       onChange={(event) => setUsername(event.target.value)}
                       placeholder="choose a handle"
-                      className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
+                      className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                     />
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white/90">
+                  <label className="text-sm font-semibold text-[color:var(--hero-text)]">
                     Password
                   </label>
                   <input
@@ -262,12 +283,12 @@ function AuthContent() {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Enter a secure password"
-                    className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-300 focus:bg-white/15"
+                    className="w-full rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-4 py-3 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
                   />
                 </div>
 
                 {error && (
-                  <div className="rounded-2xl border border-red-200/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                  <div className="rounded-2xl border border-rose-300/50 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
                     {error}
                   </div>
                 )}
@@ -275,7 +296,7 @@ function AuthContent() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex h-12 w-full items-center justify-center rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-200 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex h-12 w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[color-mix(in_srgb,var(--accent)_28%,transparent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_90%,var(--accent-strong))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isLoading
                     ? "Submitting..."
@@ -284,7 +305,7 @@ function AuthContent() {
                       : "Create account"}
                 </button>
 
-                <p className="text-xs text-indigo-50/80">
+                <p className="text-xs text-[color-mix(in_srgb,var(--hero-text)_60%,transparent)]">
                   All accounts use the same Prisma database. If you already have
                   a Google account with this email, please sign in with Google
                   instead.
@@ -302,7 +323,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-900 text-white">
+        <div className="flex min-h-screen items-center justify-center theme-hero text-[color:var(--hero-text)]">
           Loading authentication...
         </div>
       }

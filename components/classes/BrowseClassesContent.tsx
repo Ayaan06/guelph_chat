@@ -86,7 +86,6 @@ export function BrowseClassesContent({
         throw new Error(data.error || "Unable to join course");
       }
 
-      // Keep navigation snappy for the chat handoff.
       const target = `/chat?courseId=${encodeURIComponent(course.id)}`;
       router.prefetch(target);
       router.push(target);
@@ -101,71 +100,78 @@ export function BrowseClassesContent({
 
   return (
     <div className="space-y-10">
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 shadow-xl">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
-              Step 2 ¬∑ Discover courses
+      <section className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--panel-gradient)] p-8 shadow-xl transition-colors">
+        <div
+          className="absolute inset-0 opacity-80"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 30%), radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--accent-strong) 12%, transparent) 0%, transparent 28%)",
+          }}
+        />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-3 text-[color:var(--page-foreground)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+              Step 2 ∑ Discover courses
             </p>
-            <h1 className="text-3xl font-semibold leading-tight text-white">
+            <h1 className="text-3xl font-semibold leading-tight">
               Find your courses and drop straight into chat.
             </h1>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-[color:var(--muted)]">
               Search, filter, and sort to locate the right room. Joining moves
               you instantly into the class chat and updates your sidebar in
               real time.
             </p>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-300">
-              <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-white">
-                Guided flow: Landing ‚Üí Discover ‚Üí Chat
+            <div className="flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
+                Guided flow: Landing ? Discover ? Chat
               </span>
-              <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-white">
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
                 Live-ready chats
               </span>
-              <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-white">
+              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
                 One-click enrollment
               </span>
             </div>
           </div>
-          <div className="grid w-full max-w-md grid-cols-3 gap-3 rounded-2xl bg-white/10 p-4 text-center text-xs font-semibold text-white shadow-inner backdrop-blur lg:max-w-lg">
-            <div className="space-y-1 rounded-xl bg-white/10 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200">
+          <div className="grid w-full max-w-md grid-cols-3 gap-3 rounded-2xl bg-[color-mix(in_srgb,var(--card)_85%,transparent)] p-4 text-center text-xs font-semibold text-[color:var(--page-foreground)] shadow-inner backdrop-blur lg:max-w-lg">
+            <div className="space-y-1 rounded-xl bg-[color-mix(in_srgb,var(--card-soft)_90%,transparent)] px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
                 Step 1
               </p>
               <p>Landing</p>
-              <p className="text-[11px] text-slate-300">
+              <p className="text-[11px] text-[color:var(--muted)]">
                 Orientation & next CTA
               </p>
             </div>
-            <div className="space-y-1 rounded-xl bg-white px-3 py-2 text-slate-900 shadow-md">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-blue-600">
+            <div className="space-y-1 rounded-xl bg-[var(--card)] px-3 py-2 text-[color:var(--page-foreground)] shadow-md">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
                 Step 2
               </p>
               <p>Discover</p>
-              <p className="text-[11px] text-slate-500">Filter & Join</p>
+              <p className="text-[11px] text-[color:var(--muted)]">Filter & Join</p>
             </div>
-            <div className="space-y-1 rounded-xl bg-white/10 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-200">
+            <div className="space-y-1 rounded-xl bg-[color-mix(in_srgb,var(--card-soft)_90%,transparent)] px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
                 Step 3
               </p>
               <p>Chat</p>
-              <p className="text-[11px] text-slate-300">Realtime room</p>
+              <p className="text-[11px] text-[color:var(--muted)]">Realtime room</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-[var(--border-strong)] bg-[var(--card)] p-6 shadow-sm transition-colors">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--muted)]">
               Discover classes
             </p>
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-[color:var(--page-foreground)]">
               Search, filter, and sort your next chat room.
             </h2>
-            <p className="text-sm text-slate-600">
-              Click ‚ÄúJoin & open chat‚Äù to get enrolled immediately and hop into
+            <p className="text-sm text-[color:var(--muted)]">
+              Click ìJoin & open chatî to get enrolled immediately and hop into
               the conversation.
             </p>
           </div>
@@ -175,12 +181,12 @@ export function BrowseClassesContent({
               placeholder="Search by course code or name..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 sm:w-64"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_22%,transparent)] sm:w-64"
             />
             <select
               value={selectedMajor}
               onChange={(event) => setSelectedMajor(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 sm:w-48"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_22%,transparent)] sm:w-48"
             >
               <option value="all">All majors</option>
               {majors.map((major) => (
@@ -192,7 +198,7 @@ export function BrowseClassesContent({
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 sm:w-44"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_22%,transparent)] sm:w-44"
             >
               <option value="popularity">Sort: Popularity</option>
               <option value="code">Sort: Course code</option>
@@ -213,15 +219,15 @@ export function BrowseClassesContent({
           <section key={group.major.id} className="space-y-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-lg font-semibold text-[color:var(--page-foreground)]">
                   {group.major.name}
                 </h3>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-[color:var(--muted)]">
                   Curated classes for {group.major.name} students. Hover a card
                   to preview; click once to join and launch chat.
                 </p>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--card-soft)_70%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--page-foreground)]">
                 {group.courses.length} course
                 {group.courses.length === 1 ? "" : "s"}
               </span>
@@ -242,11 +248,11 @@ export function BrowseClassesContent({
         ))}
 
         {groupedByMajor.length === 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <p className="text-sm font-semibold text-slate-900">
+          <div className="rounded-2xl border border-[var(--border-strong)] bg-[var(--card)] p-8 text-center shadow-sm">
+            <p className="text-sm font-semibold text-[color:var(--page-foreground)]">
               No classes match your filters yet.
             </p>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-[color:var(--muted)]">
               Try clearing the search, choosing another major, or sorting by a
               different signal.
             </p>
