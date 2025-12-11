@@ -31,6 +31,7 @@ export function CourseCard({
 }: CourseCardProps) {
   const memberLabel = `${course.memberCount ?? 0} enrolled`;
   const showJoin = Boolean(onJoin);
+  const fallbackHref = `/chat?courseId=${encodeURIComponent(course.id)}`;
 
   return (
     <div
@@ -91,7 +92,7 @@ export function CourseCard({
           </button>
         ) : (
           <Link
-            href={href ?? "#"}
+            href={href ?? fallbackHref}
             className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:translate-y-[-1px] hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
           >
             {actionLabel}

@@ -1,12 +1,9 @@
-import { CourseChatLayout } from "@/components/chat/CourseChatLayout";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { authOptions, type AppSession } from "@/lib/auth";
-import { fetchInitialMessagesForCourse } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
-// Ensure this route always executes on the Node runtime (not edge) because it uses Prisma.
+// Prisma requires the Node runtime.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -16,8 +13,6 @@ type CoursePageProps = {
   };
 };
 
-const TERM_LABEL = "Fall 2025";
-
 export default async function CoursePage({ params }: CoursePageProps) {
   const session = (await getServerSession(authOptions)) as AppSession | null;
 
@@ -26,17 +21,15 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   if (!params?.courseId) {
-    redirect("/classes");
+    redirect("/chat");
   }
 
   const courseIdParam = decodeURIComponent(params.courseId);
-  const userId = session.user.id;
 
   let course = await prisma.course.findUnique({
     where: { id: courseIdParam },
   });
 
-  // Support linking by course code in case the URL contains the human-readable code.
   if (!course) {
     course = await prisma.course.findUnique({
       where: { code: courseIdParam },
@@ -44,101 +37,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   if (!course) {
-    redirect("/classes");
+    redirect("/chat");
   }
 
-  // Auto-enroll the user when they open a class chat to keep UX smooth.
-  await prisma.classMembership.upsert({
-    where: {
-      userId_courseId: {
-        userId,
-        courseId: course.id,
-      },
-    },
-    update: {},
-    create: {
-      userId,
-      courseId: course.id,
-    },
-  });
-
-  const [memberships, classmatesRaw, initialMessages] = await Promise.all([
-    prisma.classMembership.findMany({
-      where: { userId },
-      include: {
-        course: true,
-      },
-      orderBy: { joinedAt: "desc" },
-    }),
-    prisma.classMembership.findMany({
-      where: { courseId: course.id },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-      orderBy: { joinedAt: "desc" },
-      take: 24,
-    }),
-    fetchInitialMessagesForCourse(course.id),
-  ]);
-
-  const joinedCourses = memberships
-    .filter((membership) => membership.course)
-    .map(({ course }) => ({
-      id: course.id,
-      code: course.code,
-      name: course.name,
-      major: course.major,
-      level: course.level,
-    }));
-
-  const courseIdsForCounts = Array.from(
-    new Set([...joinedCourses.map((item) => item.id), course.id]),
-  );
-  const memberCounts = await prisma.classMembership.groupBy({
-    by: ["courseId"],
-    where: { courseId: { in: courseIdsForCounts } },
-    _count: { courseId: true },
-  });
-  const memberCountMap = new Map(
-    memberCounts.map((entry) => [entry.courseId, entry._count.courseId]),
-  );
-
-  const joinedCoursesWithCounts = joinedCourses.map((item) => ({
-    ...item,
-    memberCount: memberCountMap.get(item.id) ?? 0,
-  }));
-
-  const classmates = classmatesRaw
-    .filter((member) => member.userId !== userId)
-    .map((member) => ({
-      id: member.userId,
-      name: member.user.name ?? member.user.email ?? "Classmate",
-    }));
-
-  const userName = session.user?.name ?? session.user?.email ?? "You";
-  const userEmail = session.user?.email ?? undefined;
-
-  return (
-    <AppLayout userName={userName} userEmail={userEmail}>
-      <CourseChatLayout
-        course={{
-          id: course.id,
-      code: course.code,
-      name: course.name,
-      major: course.major,
-      level: course.level,
-      memberCount: memberCountMap.get(course.id) ?? 0,
-    }}
-    majorName={course.major}
-    initialMessages={initialMessages.messages}
-    initialCursor={initialMessages.nextCursor}
-    classmates={classmates}
-    joinedCourses={joinedCoursesWithCounts}
-    termLabel={TERM_LABEL}
-    userId={userId}
-  />
-    </AppLayout>
-  );
+  // Always funnel class chat deep links into the unified /chat view.
+  redirect(`/chat?courseId=${encodeURIComponent(course.id)}`);
 }

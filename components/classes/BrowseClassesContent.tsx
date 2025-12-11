@@ -87,8 +87,9 @@ export function BrowseClassesContent({
       }
 
       // Keep navigation snappy for the chat handoff.
-      router.prefetch(`/classes/${encodeURIComponent(course.id)}`);
-      router.push(`/classes/${encodeURIComponent(course.id)}`);
+      const target = `/chat?courseId=${encodeURIComponent(course.id)}`;
+      router.prefetch(target);
+      router.push(target);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Something went wrong joining.",
