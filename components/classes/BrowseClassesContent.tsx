@@ -17,6 +17,12 @@ type BrowseClassesContentProps = {
 
 type SortOption = "popularity" | "code" | "level";
 
+const accentPalette: Array<"blue" | "emerald" | "indigo"> = [
+  "blue",
+  "indigo",
+  "emerald",
+];
+
 export function BrowseClassesContent({
   majors,
   courses,
