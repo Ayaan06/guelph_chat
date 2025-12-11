@@ -9,14 +9,15 @@ export const runtime = "nodejs";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { userId: string } },
+  context: { params: Promise<{ userId: string }> },
 ) {
+  const { userId: requestedUserId } = await context.params;
+
   const session = (await getServerSession(authOptions)) as AppSession | null;
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const requestedUserId = params?.userId;
   if (!requestedUserId) {
     return NextResponse.json({ error: "userId is required" }, { status: 400 });
   }
