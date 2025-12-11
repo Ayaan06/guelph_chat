@@ -7,6 +7,8 @@ import {
   useEffect,
   useMemo,
   useState,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
 
 type Theme = "light" | "dark";
@@ -15,7 +17,7 @@ type ThemeContextValue = {
   theme: Theme;
   resolvedTheme: Theme;
   isReady: boolean;
-  setTheme: (value: Theme) => void;
+  setTheme: Dispatch<SetStateAction<Theme>>;
   toggleTheme: () => void;
 };
 
@@ -65,9 +67,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(theme);
   }, [isReady, theme]);
 
-  const setTheme = useCallback((value: Theme) => {
-    setThemeState(value);
-    applyTheme(value);
+  const setTheme = useCallback<Dispatch<SetStateAction<Theme>>>((value) => {
+    setThemeState((current) => {
+      const next = typeof value === "function" ? value(current) : value;
+      applyTheme(next);
+      return next;
+    });
   }, []);
 
   const toggleTheme = useCallback(() => {
