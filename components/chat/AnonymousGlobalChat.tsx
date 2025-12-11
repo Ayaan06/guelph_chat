@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { MESSAGE_PAGE_SIZE } from "@/lib/chatConfig";
+import { hasRealtimeEnv, supabaseClient } from "@/lib/supabaseClient";
 import type { MessageDTO } from "@/types/chat";
 
 function sortMessages(messages: MessageDTO[]) {
@@ -20,6 +21,7 @@ function mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
 }
 
 export function AnonymousGlobalChat() {
+  const GLOBAL_COURSE_ID = "global-chat";
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -31,6 +33,7 @@ export function AnonymousGlobalChat() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const prependingRef = useRef(false);
   const initializedRef = useRef(false);
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const displayed = useMemo(
     () =>
@@ -114,6 +117,19 @@ export function AnonymousGlobalChat() {
     }
   };
 
+  const refreshLatest = async () => {
+    try {
+      const response = await fetch(
+        `/api/public-global-chat?limit=${MESSAGE_PAGE_SIZE}`,
+      );
+      if (!response.ok) return;
+      const data = (await response.json()) as { messages: MessageDTO[] };
+      setMessages((prev) => mergeMessages(prev, data.messages ?? []));
+    } catch (err) {
+      console.error("Polling global chat failed", err);
+    }
+  };
+
   useEffect(() => {
     // Assign a lightweight anonymous handle per visit.
     const saved =
@@ -141,6 +157,74 @@ export function AnonymousGlobalChat() {
     scrollToBottom(initializedRef.current ? "smooth" : "auto");
     initializedRef.current = true;
   }, [messages.length, isLoading]);
+
+  useEffect(() => {
+    if (!hasRealtimeEnv || !supabaseClient) {
+      return undefined;
+    }
+
+    const channel = supabaseClient
+      .channel(`messages-course-${GLOBAL_COURSE_ID}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `courseId=eq.${GLOBAL_COURSE_ID}`,
+        },
+        (payload) => {
+          const incoming = payload.new as {
+            id: string;
+            courseId: string;
+            senderId: string;
+            senderName?: string | null;
+            content: string;
+            createdAt?: string;
+          };
+
+          const message: MessageDTO = {
+            id: incoming.id,
+            courseId: incoming.courseId,
+            senderId: incoming.senderId,
+            senderName: incoming.senderName || "Anonymous",
+            content: incoming.content,
+            createdAt: incoming.createdAt ?? new Date().toISOString(),
+          };
+
+          setMessages((prev) => {
+            if (prev.some((existing) => existing.id === message.id)) {
+              return prev;
+            }
+            return sortMessages([...prev, message]);
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabaseClient?.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (hasRealtimeEnv && supabaseClient) {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+      return () => undefined;
+    }
+
+    pollTimerRef.current = setInterval(refreshLatest, 3000);
+
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSend = async () => {
     const trimmed = draft.trim();
