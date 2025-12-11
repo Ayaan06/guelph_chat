@@ -17,12 +17,6 @@ type BrowseClassesContentProps = {
 
 type SortOption = "popularity" | "code" | "level";
 
-const accentPalette: Array<"blue" | "emerald" | "indigo"> = [
-  "blue",
-  "indigo",
-  "emerald",
-];
-
 export function BrowseClassesContent({
   majors,
   courses,
@@ -100,67 +94,6 @@ export function BrowseClassesContent({
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--panel-gradient)] p-8 shadow-xl transition-colors">
-        <div
-          className="absolute inset-0 opacity-80"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 30%), radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--accent-strong) 12%, transparent) 0%, transparent 28%)",
-          }}
-        />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3 text-[color:var(--page-foreground)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-              Step 2 - Discover courses
-            </p>
-            <h1 className="text-3xl font-semibold leading-tight">
-              Find your courses and drop straight into chat.
-            </h1>
-            <p className="text-sm text-[color:var(--muted)]">
-              Search, filter, and sort to locate the right room. Joining moves
-              you instantly into the class chat and updates your sidebar in
-              real time.
-            </p>
-            <div className="flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
-              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
-                Guided flow: Landing {`->`} Discover {`->`} Chat
-              </span>
-              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
-                Live-ready chats
-              </span>
-              <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
-                One-click enrollment
-              </span>
-            </div>
-          </div>
-          <div className="grid w-full max-w-md grid-cols-3 gap-3 rounded-2xl bg-[color-mix(in_srgb,var(--card)_85%,transparent)] p-4 text-center text-xs font-semibold text-[color:var(--page-foreground)] shadow-inner backdrop-blur lg:max-w-lg">
-            <div className="space-y-1 rounded-xl bg-[color-mix(in_srgb,var(--card-soft)_90%,transparent)] px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
-                Step 1
-              </p>
-              <p>Landing</p>
-              <p className="text-[11px] text-[color:var(--muted)]">
-                Orientation and next CTA
-              </p>
-            </div>
-            <div className="space-y-1 rounded-xl bg-[var(--card)] px-3 py-2 text-[color:var(--page-foreground)] shadow-md">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
-                Step 2
-              </p>
-              <p>Discover</p>
-              <p className="text-[11px] text-[color:var(--muted)]">Filter and join</p>
-            </div>
-            <div className="space-y-1 rounded-xl bg-[color-mix(in_srgb,var(--card-soft)_90%,transparent)] px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
-                Step 3
-              </p>
-              <p>Chat</p>
-              <p className="text-[11px] text-[color:var(--muted)]">Realtime room</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="rounded-2xl border border-[var(--border-strong)] bg-[var(--card)] p-6 shadow-sm transition-colors">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">

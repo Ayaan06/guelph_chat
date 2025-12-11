@@ -118,45 +118,6 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
   return (
     <AppLayout userName={userName} userEmail={userEmail}>
       <div className="space-y-8">
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-              Step 1
-            </p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-900">
-              Landing
-            </h2>
-            <p className="text-sm text-slate-600">
-              You&apos;re here. Quick summary, next CTA, and your chats ready in
-              the sidebar.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-              Step 2
-            </p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-900">
-              Discover
-            </h2>
-            <p className="text-sm text-slate-600">
-              Browse &ldquo;Discover classes&rdquo; to search, filter, and join.
-              Joining instantly enrolls and redirects you into chat.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-              Step 3
-            </p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-900">
-              Chat
-            </h2>
-            <p className="text-sm text-slate-600">
-              Realtime chat with sticky course header, improved bubbles, and a
-              premium composer.
-            </p>
-          </div>
-        </section>
-
         <ChatExperience
           courses={coursesWithMeta}
           userId={session.user.id}

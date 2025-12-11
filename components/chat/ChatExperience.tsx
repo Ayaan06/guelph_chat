@@ -539,7 +539,7 @@ export function ChatExperience({
           <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
             <div className="space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-                Class chat Â· Step 3
+                Class chat
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {activeCourse
