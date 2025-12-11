@@ -92,54 +92,6 @@ export function ChatExperience({
     [messages, userId],
   );
 
-  const handleShowProfile = async (targetUserId: string, senderName: string) => {
-    setProfileModal({
-      userId: targetUserId,
-      senderName,
-      loading: true,
-      error: null,
-      profile: null,
-    });
-
-    try {
-      const response = await fetch(`/api/profile/${encodeURIComponent(targetUserId)}`);
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || "Unable to load profile");
-      }
-      const data = (await response.json()) as {
-        profile?: {
-          name: string;
-          email?: string;
-          majorId?: string;
-          majorName?: string;
-          year?: string;
-          interests?: string[];
-        };
-      };
-
-      setProfileModal((prev) =>
-        prev
-          ? {
-              ...prev,
-              loading: false,
-              profile: data.profile ?? null,
-            }
-          : prev,
-      );
-    } catch (err) {
-      setProfileModal((prev) =>
-        prev
-          ? {
-              ...prev,
-              loading: false,
-              error: err instanceof Error ? err.message : "Failed to load profile",
-            }
-          : prev,
-      );
-    }
-  };
-
   const filteredCourses = useMemo(() => {
     const query = courseFilter.trim().toLowerCase();
     if (!query) return courses;
@@ -334,8 +286,7 @@ export function ChatExperience({
             senderName: incoming.senderName || "Classmate",
             content: incoming.content,
             createdAt:
-              incoming.createdAt ??
-              new Date().toISOString(),
+              incoming.createdAt ?? new Date().toISOString(),
           };
 
           setMessages((prev) => {
@@ -419,275 +370,324 @@ export function ChatExperience({
     }
   };
 
+  const handleShowProfile = async (targetUserId: string, senderName: string) => {
+    setProfileModal({
+      userId: targetUserId,
+      senderName,
+      loading: true,
+      error: null,
+      profile: null,
+    });
+
+    try {
+      const response = await fetch(`/api/profile/${encodeURIComponent(targetUserId)}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Unable to load profile");
+      }
+      const data = (await response.json()) as {
+        profile?: {
+          name: string;
+          email?: string;
+          majorId?: string;
+          majorName?: string;
+          year?: string;
+          interests?: string[];
+        };
+      };
+
+      setProfileModal((prev) =>
+        prev
+          ? {
+              ...prev,
+              loading: false,
+              profile: data.profile ?? null,
+            }
+          : prev,
+      );
+    } catch (err) {
+      setProfileModal((prev) =>
+        prev
+          ? {
+              ...prev,
+              loading: false,
+              error: err instanceof Error ? err.message : "Failed to load profile",
+            }
+          : prev,
+      );
+    }
+  };
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[320px,1fr]">
-      <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-              Course sidebar
-            </p>
-            <h3 className="text-lg font-semibold text-slate-900">
-              Switch between classes
-            </h3>
-            <p className="text-sm text-slate-600">
-              Global chat is separated; hover to preview, click to join the room.
-            </p>
-          </div>
-          <Link
-            href="/classes"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-          >
-            + Join more
-          </Link>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-            <span className="text-xs font-semibold text-slate-600">Search</span>
-            <input
-              value={courseFilter}
-              onChange={(event) => setCourseFilter(event.target.value)}
-              placeholder="Course name, code, or major"
-              className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
-            />
-          </div>
-          <div className="space-y-2">
-            {filteredCourses.length === 0 && (
-              <p className="text-sm text-slate-600">
-                No classes match that search. Try another keyword.
+    <>
+      <div className="grid gap-6 xl:grid-cols-[320px,1fr]">
+        <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+                Course sidebar
               </p>
-            )}
-
-            {filteredCourses.map((course) => {
-              const isActive = course.id === selectedCourseId;
-              const isGlobal = course.id === globalCourseId;
-              const unreadIndicator = !isActive;
-              return (
-                <button
-                  key={course.id}
-                  type="button"
-                  onClick={() => setSelectedCourseId(course.id)}
-                  onMouseEnter={() => setHoveredCourseId(course.id)}
-                  onMouseLeave={() => setHoveredCourseId(null)}
-                  className={`group relative w-full overflow-visible rounded-2xl border px-4 py-3 text-left transition ${
-                    isActive
-                      ? "border-slate-900 bg-slate-900 text-white shadow-md"
-                      : "border-slate-200 bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
-                  } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <p
-                        className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                          isActive ? "text-slate-200" : "text-slate-500"
-                        }`}
-                      >
-                        {isGlobal ? "Global chat" : course.code}
-                      </p>
-                      <p className="text-sm font-semibold">{course.name}</p>
-                      <p
-                        className={`text-xs ${
-                          isActive ? "text-slate-300" : "text-slate-500"
-                        }`}
-                      >
-                        {course.major} • Level {course.level}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {unreadIndicator && (
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full ${
-                            isActive ? "bg-emerald-300" : "bg-emerald-500"
-                          }`}
-                          title="Unread indicator"
-                          aria-hidden
-                        />
-                      )}
-                      <span
-                        className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
-                          isActive
-                            ? "bg-white/10 text-white"
-                            : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {course.memberCount ?? 0} in room
-                      </span>
-                    </div>
-                  </div>
-                  {hoveredCourseId === course.id && (
-                    <div className="pointer-events-none absolute inset-x-0 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-lg">
-                      <p className="font-semibold text-slate-900">
-                        {course.code} — {course.name}
-                      </p>
-                      <p className="mt-1 text-slate-600">
-                        {course.termLabel ?? "Current term"} · {course.major}
-                      </p>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </aside>
-
-      <section
-        id="chat-window"
-        className="relative flex min-h-[620px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
-      >
-        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
-              Class chat · Step 3
-            </p>
-            <h2 className="text-xl font-semibold text-slate-900">
-              {activeCourse
-                ? `${activeCourse.code} — ${activeCourse.name}`
-                : "Select a class"}
-            </h2>
-            <p className="text-sm text-slate-600">
-              Sticky course header, live status, and quick actions.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-800">
-              {activeCourse?.memberCount ?? 0} classmates
-            </span>
-            <span
-              className={`rounded-full px-3 py-1 ${
-                isRealtimeActive
-                  ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
-                  : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
-              }`}
+              <h3 className="text-lg font-semibold text-slate-900">
+                Switch between classes
+              </h3>
+              <p className="text-sm text-slate-600">
+                Global chat is separated; hover to preview, click to join the room.
+              </p>
+            </div>
+            <Link
+              href="/classes"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             >
-              {hasRealtimeEnv
-                ? isRealtimeActive
-                  ? "Realtime connected"
-                  : "Connecting…"
-                : "Live via polling"}
-            </span>
+              + Join more
+            </Link>
           </div>
-        </div>
 
-        <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.08),transparent_22%)]" />
-          <div
-            className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
-            ref={containerRef}
-          >
-            {nextCursor && (
-              <div className="flex justify-center">
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+              <span className="text-xs font-semibold text-slate-600">Search</span>
+              <input
+                value={courseFilter}
+                onChange={(event) => setCourseFilter(event.target.value)}
+                placeholder="Course name, code, or major"
+                className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              />
+            </div>
+            <div className="space-y-2">
+              {filteredCourses.length === 0 && (
+                <p className="text-sm text-slate-600">
+                  No classes match that search. Try another keyword.
+                </p>
+              )}
+
+              {filteredCourses.map((course) => {
+                const isActive = course.id === selectedCourseId;
+                const isGlobal = course.id === globalCourseId;
+                const unreadIndicator = !isActive;
+                return (
+                  <button
+                    key={course.id}
+                    type="button"
+                    onClick={() => setSelectedCourseId(course.id)}
+                    onMouseEnter={() => setHoveredCourseId(course.id)}
+                    onMouseLeave={() => setHoveredCourseId(null)}
+                    className={`group relative w-full overflow-visible rounded-2xl border px-4 py-3 text-left transition ${
+                      isActive
+                        ? "border-slate-900 bg-slate-900 text-white shadow-md"
+                        : "border-slate-200 bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
+                    } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <p
+                          className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                            isActive ? "text-slate-200" : "text-slate-500"
+                          }`}
+                        >
+                          {isGlobal ? "Global chat" : course.code}
+                        </p>
+                        <p className="text-sm font-semibold">{course.name}</p>
+                        <p
+                          className={`text-xs ${
+                            isActive ? "text-slate-300" : "text-slate-500"
+                          }`}
+                        >
+                          {course.major} • Level {course.level}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {unreadIndicator && (
+                          <span
+                            className={`h-2.5 w-2.5 rounded-full ${
+                              isActive ? "bg-emerald-300" : "bg-emerald-500"
+                            }`}
+                            title="Unread indicator"
+                            aria-hidden
+                          />
+                        )}
+                        <span
+                          className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                            isActive
+                              ? "bg-white/10 text-white"
+                              : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {course.memberCount ?? 0} in room
+                        </span>
+                      </div>
+                    </div>
+                    {hoveredCourseId === course.id && (
+                      <div className="pointer-events-none absolute inset-x-0 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-lg">
+                        <p className="font-semibold text-slate-900">
+                          {course.code} — {course.name}
+                        </p>
+                        <p className="mt-1 text-slate-600">
+                          {course.termLabel ?? "Current term"} · {course.major}
+                        </p>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+
+        <section
+          id="chat-window"
+          className="relative flex min-h-[620px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-600">
+                Class chat · Step 3
+              </p>
+              <h2 className="text-xl font-semibold text-slate-900">
+                {activeCourse
+                  ? `${activeCourse.code} — ${activeCourse.name}`
+                  : "Select a class"}
+              </h2>
+              <p className="text-sm text-slate-600">
+                Sticky course header, live status, and quick actions.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-800">
+                {activeCourse?.memberCount ?? 0} classmates
+              </span>
+              <span
+                className={`rounded-full px-3 py-1 ${
+                  isRealtimeActive
+                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
+                    : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
+                }`}
+              >
+                {hasRealtimeEnv
+                  ? isRealtimeActive
+                    ? "Realtime connected"
+                    : "Connecting..."
+                  : "Live via polling"}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_80%_0%,rgba(99,102,241,0.08),transparent_20%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.08),transparent_22%)]" />
+            <div
+              className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
+              ref={containerRef}
+            >
+              {nextCursor && (
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={fetchOlder}
+                    disabled={isPaginating}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isPaginating ? "Loading..." : "Load older messages"}
+                  </button>
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
+                    <div className="h-10 w-10 animate-pulse rounded-full bg-slate-100" />
+                    Loading messages...
+                  </div>
+                </div>
+              )}
+
+              {!isLoading && activeCourse && messages.length === 0 && (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
+                    <div className="h-12 w-12 rounded-2xl bg-slate-100" />
+                    <p className="font-semibold text-slate-900">
+                      No messages yet.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Start the chat — everyone will see it instantly.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!activeCourse && (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
+                    <div className="h-12 w-12 rounded-full bg-slate-100" />
+                    Pick a class to unlock the chat window.
+                  </div>
+                </div>
+              )}
+
+              {displayedMessages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  onShowProfile={handleShowProfile}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 bg-white px-6 py-4">
+            <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
+              <span>Message</span>
+              <span className="text-xs text-slate-500">
+                Enter to send / Shift+Enter for newline
+              </span>
+            </div>
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div className="flex w-full items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-inner">
                 <button
                   type="button"
-                  onClick={fetchOlder}
-                  disabled={isPaginating}
-                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed"
+                  aria-label="Attach (coming soon)"
+                  disabled
                 >
-                  {isPaginating ? "Loading..." : "Load older messages"}
+                  Attach
+                </button>
+                <textarea
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  rows={3}
+                  placeholder={
+                    activeCourse
+                      ? `Text classmates in ${activeCourse.code}`
+                      : "Pick a class to start texting"
+                  }
+                  className="h-24 w-full resize-none bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
+                  disabled={!activeCourse || isSending}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={!draft.trim() || !activeCourse || isSending}
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {isSending ? "Sending..." : "Send message"}
                 </button>
               </div>
-            )}
-
-            {isLoading && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
-                  <div className="h-10 w-10 animate-pulse rounded-full bg-slate-100" />
-                  Loading messages...
-                </div>
-              </div>
-            )}
-
-            {!isLoading && activeCourse && messages.length === 0 && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-100" />
-                  <p className="font-semibold text-slate-900">
-                    No messages yet.
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Start the chat — everyone will see it instantly.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {!activeCourse && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 text-sm text-slate-600 shadow-sm">
-                  <div className="h-12 w-12 rounded-full bg-slate-100" />
-                  Pick a class to unlock the chat window.
-                </div>
-              </div>
-            )}
-
-            {displayedMessages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                onShowProfile={handleShowProfile}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-slate-200 bg-white px-6 py-4">
-          <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
-            <span>Message</span>
-            <span className="text-xs text-slate-500">
-              Enter to send · Shift+Enter for newline
-            </span>
-          </div>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
-            <div className="flex w-full items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-inner">
-              <button
-                type="button"
-                className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed"
-                aria-label="Attach (coming soon)"
-                disabled
-              >
-                📎
-              </button>
-              <textarea
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    handleSend();
-                  }
-                }}
-                rows={3}
-                placeholder={
-                  activeCourse
-                    ? `Text classmates in ${activeCourse.code}`
-                    : "Pick a class to start texting"
-                }
-                className="h-24 w-full resize-none bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
-                disabled={!activeCourse || isSending}
-              />
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={!draft.trim() || !activeCourse || isSending}
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {isSending ? "Sending..." : "Send message"}
-              </button>
-            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Messages are delivered instantly. Realtime via Supabase when
+              available; falls back to quick polling automatically.
+            </p>
+            {error && (
+              <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>
+            )}
           </div>
-          <p className="mt-1 text-xs text-slate-500">
-            Messages are delivered instantly. Realtime via Supabase when
-            available; falls back to quick polling automatically.
-          </p>
-          {error && (
-            <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>
-          )}
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
 
       {profileModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur">
@@ -698,7 +698,7 @@ export function ChatExperience({
               className="absolute right-3 top-3 text-slate-500 hover:text-slate-900"
               aria-label="Close profile"
             >
-              ×
+              X
             </button>
             <div className="space-y-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-600">
@@ -768,5 +768,6 @@ export function ChatExperience({
           </div>
         </div>
       )}
+    </>
   );
 }
