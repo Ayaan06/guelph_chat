@@ -23,6 +23,7 @@ export function AnonymousGlobalChat() {
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [alias, setAlias] = useState("Anonymous");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isPaginating, setIsPaginating] = useState(false);
@@ -114,6 +115,20 @@ export function AnonymousGlobalChat() {
   };
 
   useEffect(() => {
+    // Assign a lightweight anonymous handle per visit.
+    const saved =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("globalAnonName")
+        : null;
+    if (saved) {
+      setAlias(saved);
+    } else {
+      const generated = `Anonymous${Math.floor(1000 + Math.random() * 9000)}`;
+      setAlias(generated);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("globalAnonName", generated);
+      }
+    }
     loadLatest();
   }, []);
 
@@ -139,7 +154,7 @@ export function AnonymousGlobalChat() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content: trimmed }),
+        body: JSON.stringify({ content: trimmed, alias }),
       });
 
       if (!response.ok) {
@@ -170,7 +185,8 @@ export function AnonymousGlobalChat() {
             </p>
             <h3 className="text-lg font-semibold">Say hi before logging in</h3>
             <p className="text-xs text-indigo-50/80">
-              Messages here are tagged as Anonymous and visible to everyone.
+              You&apos;re chatting as <span className="font-semibold text-white">{alias}</span>.
+              Messages are visible to everyone.
             </p>
           </div>
           <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">

@@ -66,6 +66,10 @@ export async function POST(request: NextRequest) {
   const anonymousUser = await ensureAnonymousUser();
 
   const body = await request.json().catch(() => null);
+  const alias =
+    typeof body?.alias === "string"
+      ? body.alias.slice(0, 50).trim()
+      : "";
   const content = typeof body?.content === "string" ? body.content.trim() : "";
 
   if (!content) {
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
     data: {
       courseId: GLOBAL_COURSE.id,
       senderId: anonymousUser.id,
-      senderName: ANONYMOUS_USER.name,
+      senderName: alias || ANONYMOUS_USER.name,
       content,
     },
     include: {
