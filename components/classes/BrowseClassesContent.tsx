@@ -111,7 +111,7 @@ export function BrowseClassesContent({
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3 text-[color:var(--page-foreground)]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-              Step 2 · Discover courses
+              Step 2 - Discover courses
             </p>
             <h1 className="text-3xl font-semibold leading-tight">
               Find your courses and drop straight into chat.
@@ -123,7 +123,7 @@ export function BrowseClassesContent({
             </p>
             <div className="flex flex-wrap gap-2 text-xs text-[color:var(--muted)]">
               <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
-                Guided flow: Landing ? Discover ? Chat
+                Guided flow: Landing -> Discover -> Chat
               </span>
               <span className="rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 font-semibold text-[color:var(--page-foreground)]">
                 Live-ready chats
@@ -140,7 +140,7 @@ export function BrowseClassesContent({
               </p>
               <p>Landing</p>
               <p className="text-[11px] text-[color:var(--muted)]">
-                Orientation & next CTA
+                Orientation and next CTA
               </p>
             </div>
             <div className="space-y-1 rounded-xl bg-[var(--card)] px-3 py-2 text-[color:var(--page-foreground)] shadow-md">
@@ -148,7 +148,7 @@ export function BrowseClassesContent({
                 Step 2
               </p>
               <p>Discover</p>
-              <p className="text-[11px] text-[color:var(--muted)]">Filter & Join</p>
+              <p className="text-[11px] text-[color:var(--muted)]">Filter and join</p>
             </div>
             <div className="space-y-1 rounded-xl bg-[color-mix(in_srgb,var(--card-soft)_90%,transparent)] px-3 py-2">
               <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted)]">
@@ -171,7 +171,7 @@ export function BrowseClassesContent({
               Search, filter, and sort your next chat room.
             </h2>
             <p className="text-sm text-[color:var(--muted)]">
-              Click “Join & open chat” to get enrolled immediately and hop into
+              Click "Join & open chat" to get enrolled immediately and hop into
               the conversation.
             </p>
           </div>

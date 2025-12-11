@@ -278,11 +278,9 @@ export function AnonymousGlobalChat() {
               Say hi before logging in
             </h3>
             <p className="text-xs text-[color-mix(in_srgb,var(--hero-text)_70%,transparent)]">
-              You&apos;re chatting as {" "}
-              <span className="font-semibold text-[color:var(--hero-text)]">
-                {alias}
-              </span>
-              . Messages are visible to everyone.
+              You are chatting as
+              <span className="font-semibold text-[color:var(--hero-text)]"> {alias}</span>.
+              Messages are visible to everyone.
             </p>
           </div>
           <span className="inline-flex items-center rounded-full border border-[var(--hero-card-border)] bg-[color-mix(in_srgb,var(--hero-card-bg)_70%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--hero-text)]">
@@ -349,7 +347,7 @@ export function AnonymousGlobalChat() {
               disabled={isSending}
             />
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[color:var(--muted)]">
-              <span>Enter to send • Shift+Enter for newline</span>
+              <span>Enter to send / Shift+Enter for newline</span>
               <button
                 type="button"
                 onClick={handleSend}
