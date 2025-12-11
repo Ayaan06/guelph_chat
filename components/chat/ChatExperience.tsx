@@ -41,6 +41,15 @@ export function ChatExperience({
     }
     return courses[0]?.id ?? "";
   });
+  const [activeCourse, setActiveCourse] = useState<CourseSummary | null>(() => {
+    const initialId =
+      initialCourseId && courses.some((c) => c.id === initialCourseId)
+        ? initialCourseId
+        : courses[0]?.id ?? null;
+    return initialId
+      ? courses.find((course) => course.id === initialId) ?? null
+      : null;
+  });
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -51,16 +60,12 @@ export function ChatExperience({
   const [isRealtimeActive, setIsRealtimeActive] = useState(false);
   const [courseFilter, setCourseFilter] = useState("");
   const [hoveredCourseId, setHoveredCourseId] = useState<string | null>(null);
+  const [hasAppliedInitial, setHasAppliedInitial] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const prependingRef = useRef(false);
   const messagesInitializedRef = useRef(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const activeCourse = useMemo(
-    () => courses.find((course) => course.id === selectedCourseId),
-    [courses, selectedCourseId],
-  );
 
   const displayedMessages = useMemo(
     () =>
@@ -96,8 +101,11 @@ export function ChatExperience({
       (course) => course.id === selectedCourseId,
     );
 
-    if (matchesInitial && selectedCourseId !== initialCourseId) {
-      setSelectedCourseId(initialCourseId);
+    if (matchesInitial && !hasAppliedInitial) {
+      if (selectedCourseId !== initialCourseId) {
+        setSelectedCourseId(initialCourseId);
+      }
+      setHasAppliedInitial(true);
       return;
     }
 
@@ -111,7 +119,14 @@ export function ChatExperience({
     if (courses.length === 0 && selectedCourseId !== "") {
       setSelectedCourseId("");
     }
-  }, [courses, initialCourseId, selectedCourseId]);
+  }, [courses, hasAppliedInitial, initialCourseId, selectedCourseId]);
+
+  useEffect(() => {
+    const nextCourse = selectedCourseId
+      ? courses.find((course) => course.id === selectedCourseId) ?? null
+      : null;
+    setActiveCourse(nextCourse);
+  }, [courses, selectedCourseId]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     const container = containerRef.current;
