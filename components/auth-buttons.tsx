@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
+import { SIGN_OUT_REDIRECT_URL } from "@/lib/urls";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -62,7 +63,7 @@ export function SignOutButton() {
     <ActionButton
       onClick={() =>
         signOut({
-          callbackUrl: "/auth",
+          callbackUrl: SIGN_OUT_REDIRECT_URL,
         })
       }
       variant="ghost"

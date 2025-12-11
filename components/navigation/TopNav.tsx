@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useMemo, useState } from "react";
+import { SIGN_OUT_REDIRECT_URL } from "@/lib/urls";
 
 type TopNavProps = {
   onMenuToggle: () => void;
@@ -90,7 +91,7 @@ export function TopNav({ onMenuToggle, userName, userEmail }: TopNavProps) {
                     type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
-                      signOut({ callbackUrl: "/auth" });
+                      signOut({ callbackUrl: SIGN_OUT_REDIRECT_URL });
                     }}
                     className="flex w-full items-center px-4 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
