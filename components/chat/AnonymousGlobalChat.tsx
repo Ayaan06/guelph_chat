@@ -39,9 +39,11 @@ export function AnonymousGlobalChat() {
     () =>
       messages.map((message) => ({
         ...message,
-        isOwn: false,
+        isOwn:
+          message.senderName.trim().toLowerCase() ===
+          alias.trim().toLowerCase(),
       })),
-    [messages],
+    [messages, alias],
   );
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
