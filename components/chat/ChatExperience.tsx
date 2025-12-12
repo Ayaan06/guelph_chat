@@ -445,26 +445,64 @@ export function ChatExperience({
               placeholder="Search by name, code, or major"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:w-56"
             />
-            <select
-              value={selectedCourseId}
-              onChange={(event) => setSelectedCourseId(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition hover:border-blue-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100 sm:w-72"
-            >
-              {filteredCourses.length === 0 ? (
-                <option value="">No classes found</option>
-              ) : (
-                filteredCourses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.code} — {course.name}
-                  </option>
-                ))
-              )}
-            </select>
             {activeCourse && (
               <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                 {activeCourse.memberCount ?? 0} in room
               </span>
             )}
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredCourses.length === 0 && (
+              <p className="col-span-full text-sm text-slate-600">
+                No classes match that search.
+              </p>
+            )}
+            {filteredCourses.map((course) => {
+              const isActive = course.id === selectedCourseId;
+              const isGlobal = course.id === globalCourseId;
+              return (
+                <button
+                  key={course.id}
+                  type="button"
+                  onClick={() => setSelectedCourseId(course.id)}
+                  className={`flex h-full flex-col justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${
+                    isActive ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50"
+                  } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
+                >
+                  <div className="space-y-0.5">
+                    <p
+                      className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${
+                        isActive ? "text-slate-200" : "text-slate-500"
+                      }`}
+                    >
+                      {isGlobal ? "Global chat" : course.code}
+                    </p>
+                    <p className="font-semibold leading-snug">{course.name}</p>
+                    <p
+                      className={`text-xs ${
+                        isActive ? "text-slate-300" : "text-slate-500"
+                      }`}
+                    >
+                      {course.major} - Level {course.level}
+                    </p>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] font-semibold">
+                    <span
+                      className={`rounded-full px-2 py-1 ${
+                        isActive
+                          ? "bg-white/10 text-white ring-1 ring-white/20"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {course.memberCount ?? 0} in room
+                    </span>
+                    {!isActive && (
+                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
