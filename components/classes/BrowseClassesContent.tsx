@@ -33,7 +33,9 @@ export function BrowseClassesContent({
   const [sortBy, setSortBy] = useState<SortOption>("popularity");
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [openMajors, setOpenMajors] = useState<Record<string, boolean>>({});
+  const [openMajors, setOpenMajors] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(majors.map((major) => [major.id, false])),
+  );
 
   const filteredCourses = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -102,7 +104,7 @@ export function BrowseClassesContent({
   const toggleMajor = (majorId: string) => {
     setOpenMajors((prev) => ({
       ...prev,
-      [majorId]: prev[majorId] === undefined ? false : !prev[majorId],
+      [majorId]: !(prev[majorId] ?? false),
     }));
   };
 
@@ -173,10 +175,6 @@ export function BrowseClassesContent({
                 <h3 className="text-lg font-semibold text-[color:var(--page-foreground)]">
                   {group.major.name}
                 </h3>
-                <p className="text-sm text-[color:var(--muted)]">
-                  Curated classes for {group.major.name} students. Hover a card
-                  to preview; click once to join and launch chat.
-                </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--card-soft)_70%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--page-foreground)]">
@@ -184,11 +182,11 @@ export function BrowseClassesContent({
                   {group.courses.length === 1 ? "" : "s"}
                 </span>
                 <span className="rounded-full border border-[var(--border-strong)] bg-[var(--card-soft)] px-2 py-1 text-xs font-semibold text-[color:var(--page-foreground)]">
-                  {(openMajors[group.major.id] ?? true) ? "Hide" : "Show"}
+                  {(openMajors[group.major.id] ?? false) ? "Hide" : "Show"}
                 </span>
               </div>
             </button>
-            {(openMajors[group.major.id] ?? true) && (
+            {(openMajors[group.major.id] ?? false) && (
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {group.courses.map((course, index) => (
                   <CourseCard
