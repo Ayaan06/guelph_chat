@@ -162,23 +162,23 @@ function sanitizeAttachments(
   attachments: AttachmentPreview[] | undefined,
 ): AttachmentPreview[] {
   if (!Array.isArray(attachments)) return [];
-  return attachments
-    .map((item, index) => {
-      if (!item) return null;
-      const id = item.id || `attachment-${index}`;
-      const name = item.name || "Attachment";
-      const type = item.type || "file/unknown";
-      const size = typeof item.size === "number" ? item.size : 0;
-      return {
-        id,
-        name,
-        type,
-        size,
-        dataUrl: item.dataUrl,
-        href: item.href,
-      } satisfies AttachmentPreview;
-    })
-    .filter((entry): entry is AttachmentPreview => Boolean(entry));
+  const cleaned: AttachmentPreview[] = [];
+  attachments.forEach((item, index) => {
+    if (!item) return;
+    const id = item.id || `attachment-${index}`;
+    const name = item.name || "Attachment";
+    const type = item.type || "file/unknown";
+    const size = typeof item.size === "number" ? item.size : 0;
+    cleaned.push({
+      id,
+      name,
+      type,
+      size,
+      dataUrl: item.dataUrl,
+      href: item.href,
+    });
+  });
+  return cleaned;
 }
 
 function parseRichContent(
