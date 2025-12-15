@@ -55,20 +55,21 @@ function sanitizeAttachments(
   attachments: AttachmentPreview[] | undefined,
 ): AttachmentPreview[] {
   if (!Array.isArray(attachments)) return [];
-  return attachments
-    .map((item) => {
-      if (!item?.name) return null;
-      return {
-        id: item.id || item.name,
-        name: item.name,
-        type: item.type || "file/unknown",
-        size: typeof item.size === "number" ? item.size : 0,
-        dataUrl: item.dataUrl,
-        href: item.href,
-        error: item.error,
-      } satisfies AttachmentPreview;
-    })
-    .filter((item): item is AttachmentPreview => Boolean(item));
+  const cleaned: AttachmentPreview[] = [];
+  attachments.forEach((item, index) => {
+    if (!item) return;
+    const name = item.name || "Attachment";
+    cleaned.push({
+      id: item.id || name || `attachment-${index}`,
+      name,
+      type: item.type || "file/unknown",
+      size: typeof item.size === "number" ? item.size : 0,
+      dataUrl: item.dataUrl,
+      href: item.href,
+      error: item.error,
+    });
+  });
+  return cleaned;
 }
 
 function parseContent(
