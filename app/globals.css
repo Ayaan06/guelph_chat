@@ -252,3 +252,17 @@ a {
     background-position: 0% 0%;
   }
 }
+
+@keyframes chat-confetti-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 120vh, 0) rotate(540deg);
+    opacity: 0;
+  }
+}

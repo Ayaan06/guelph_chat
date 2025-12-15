@@ -208,14 +208,15 @@ export function ChatMessage({
               />
             )}
             {attachment.dataUrl && !attachment.error && (
-              <a
-                href={attachment.dataUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-slate-200 bg-white p-1 text-[11px] font-semibold text-blue-700 underline-offset-4 hover:underline"
+              <button
+                type="button"
+                onClick={() =>
+                  window.open(attachment.dataUrl, "_blank", "noopener,noreferrer")
+                }
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-blue-700 underline-offset-4 hover:underline"
               >
                 View
-              </a>
+              </button>
             )}
             {attachment.href && (
               <a
@@ -294,9 +295,14 @@ export function ChatMessage({
     if (parsedContent.kind === "poll-vote") {
       return renderPollVote(parsedContent.vote);
     }
+    const isHeadsUp = parsedContent.kind === "plain" && parsedContent.mood === "heads-up";
     return (
       <>
-        <p className="text-sm whitespace-pre-wrap break-words">
+        <p
+          className={`whitespace-pre-wrap break-words ${
+            isHeadsUp ? "text-base sm:text-lg font-semibold" : "text-sm"
+          }`}
+        >
           {formatText(parsedContent.text)}
         </p>
         {parsedContent.attachments &&

@@ -282,6 +282,44 @@ function buildPollTallies(
   return result;
 }
 
+function fireConfettiBurst() {
+  if (typeof document === "undefined") return;
+  const colors = ["#22c55e", "#3b82f6", "#a855f7", "#f97316", "#eab308"];
+  const container = document.createElement("div");
+  container.style.position = "fixed";
+  container.style.inset = "0";
+  container.style.pointerEvents = "none";
+  container.style.overflow = "hidden";
+  container.style.zIndex = "9999";
+  container.className = "chat-confetti-container";
+
+  const count = 80;
+  for (let i = 0; i < count; i += 1) {
+    const piece = document.createElement("span");
+    const size = 6 + Math.random() * 6;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.2;
+    const duration = 2 + Math.random() * 1.5;
+    const rotate = Math.random() * 360;
+    piece.style.position = "absolute";
+    piece.style.width = `${size}px`;
+    piece.style.height = `${size * 0.4}px`;
+    piece.style.background = colors[i % colors.length];
+    piece.style.left = `${left}%`;
+    piece.style.top = "-10px";
+    piece.style.opacity = "0.9";
+    piece.style.transform = `rotate(${rotate}deg)`;
+    piece.style.borderRadius = "2px";
+    piece.style.animation = `chat-confetti-fall ${duration}s ease-out ${delay}s forwards`;
+    container.appendChild(piece);
+  }
+
+  document.body.appendChild(container);
+  setTimeout(() => {
+    container.remove();
+  }, 3500);
+}
+
 export function ChatExperience({
   courses,
   userId,
@@ -354,6 +392,7 @@ export function ChatExperience({
   const messagesInitializedRef = useRef(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const lastConfettiId = useRef<string | null>(null);
 
   const displayedMessages = useMemo(
     () =>
@@ -377,6 +416,24 @@ export function ChatExperience({
     () => buildPollTallies(decoratedMessages),
     [decoratedMessages],
   );
+
+  useEffect(() => {
+    const lastCelebrate = [...decoratedMessages]
+      .reverse()
+      .find(
+        (item) =>
+          (item.parsed.kind === "plain" || item.parsed.kind === "poll") &&
+          item.parsed.mood === "celebrate",
+      );
+
+    if (!lastCelebrate || lastCelebrate.base.id === lastConfettiId.current) {
+      return;
+    }
+
+    lastConfettiId.current = lastCelebrate.base.id;
+
+    fireConfettiBurst();
+  }, [decoratedMessages]);
 
   const canSendMessage = useMemo(() => {
     const cleaned = pendingAttachments.filter((item) => !item.error);
@@ -1077,15 +1134,15 @@ export function ChatExperience({
             className="relative flex-1 overflow-hidden"
             style={{
               backgroundImage: activeBackground.overlay,
-              backgroundSize: "140% 140%",
+              backgroundSize: "160% 160%",
               backgroundRepeat: "no-repeat",
               animation: activeBackground.animate
                 ? "chatGradientPan 26s ease-in-out infinite"
                 : undefined,
             }}
           >
-            <div className="pointer-events-none absolute inset-0 theme-panel-gradient" />
-            <div className="pointer-events-none absolute inset-0 bg-white/65 backdrop-blur-sm dark:bg-slate-900/70" />
+            <div className="pointer-events-none absolute inset-0 theme-panel-gradient opacity-80" />
+            <div className="pointer-events-none absolute inset-0 bg-white/10 backdrop-blur-[1px] dark:bg-slate-900/20" />
             <div
               className="relative flex h-full flex-col space-y-4 overflow-y-auto px-6 py-5"
               ref={containerRef}
