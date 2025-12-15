@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Sidebar, type NavItem } from "../navigation/Sidebar";
-import { TopNav } from "../navigation/TopNav";
+import { TopNav, type NavLink } from "../navigation/TopNav";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -10,7 +8,7 @@ type AppLayoutProps = {
   userEmail?: string | null;
 };
 
-const navItems: NavItem[] = [
+const navItems: NavLink[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -34,25 +32,14 @@ const navItems: NavItem[] = [
 ];
 
 export function AppLayout({ children, userEmail, userName }: AppLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-[var(--page-bg)] text-[color:var(--page-foreground)] transition-colors">
       <TopNav
-        onMenuToggle={() => setIsSidebarOpen(true)}
+        navLinks={navItems}
         userEmail={userEmail}
         userName={userName}
       />
-      <div className="relative flex">
-        <Sidebar
-          links={navItems}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-        <main className="flex-1 px-4 pb-12 pt-6 lg:px-10 lg:pt-8">
-          {children}
-        </main>
-      </div>
+      <main className="px-4 pb-12 pt-6 lg:px-10 lg:pt-8">{children}</main>
     </div>
   );
 }

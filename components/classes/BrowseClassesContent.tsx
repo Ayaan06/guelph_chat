@@ -33,6 +33,7 @@ export function BrowseClassesContent({
   const [sortBy, setSortBy] = useState<SortOption>("popularity");
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openMajors, setOpenMajors] = useState<Record<string, boolean>>({});
 
   const filteredCourses = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -98,6 +99,13 @@ export function BrowseClassesContent({
     }
   };
 
+  const toggleMajor = (majorId: string) => {
+    setOpenMajors((prev) => ({
+      ...prev,
+      [majorId]: prev[majorId] === undefined ? false : !prev[majorId],
+    }));
+  };
+
   return (
     <div className="space-y-10">
       <section className="rounded-2xl border border-[var(--border-strong)] bg-[var(--card)] p-6 shadow-sm transition-colors">
@@ -156,8 +164,12 @@ export function BrowseClassesContent({
       <div className="space-y-10">
         {groupedByMajor.map((group, groupIndex) => (
           <section key={group.major.id} className="space-y-4">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div>
+            <button
+              type="button"
+              onClick={() => toggleMajor(group.major.id)}
+              className="flex w-full items-start justify-between gap-4 rounded-2xl border border-[var(--border-strong)] bg-[var(--card)] px-4 py-3 text-left transition hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+            >
+              <div className="space-y-1">
                 <h3 className="text-lg font-semibold text-[color:var(--page-foreground)]">
                   {group.major.name}
                 </h3>
@@ -166,23 +178,32 @@ export function BrowseClassesContent({
                   to preview; click once to join and launch chat.
                 </p>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--card-soft)_70%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--page-foreground)]">
-                {group.courses.length} course
-                {group.courses.length === 1 ? "" : "s"}
-              </span>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {group.courses.map((course, index) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  majorName={group.major.name}
-                  onJoin={handleJoin}
-                  isJoining={joiningId === course.id}
-                  accent={accentPalette[(groupIndex + index) % accentPalette.length]}
-                />
-              ))}
-            </div>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--card-soft)_70%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--page-foreground)]">
+                  {group.courses.length} course
+                  {group.courses.length === 1 ? "" : "s"}
+                </span>
+                <span className="rounded-full border border-[var(--border-strong)] bg-[var(--card-soft)] px-2 py-1 text-xs font-semibold text-[color:var(--page-foreground)]">
+                  {(openMajors[group.major.id] ?? true) ? "Hide" : "Show"}
+                </span>
+              </div>
+            </button>
+            {(openMajors[group.major.id] ?? true) && (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {group.courses.map((course, index) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    majorName={group.major.name}
+                    onJoin={handleJoin}
+                    isJoining={joiningId === course.id}
+                    accent={
+                      accentPalette[(groupIndex + index) % accentPalette.length]
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </section>
         ))}
 
