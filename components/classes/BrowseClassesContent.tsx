@@ -39,14 +39,25 @@ export function BrowseClassesContent({
 
   const filteredCourses = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
+    const normalizedQuery = query.replace(/[^a-z0-9]/gi, "");
 
     const list = courses.filter((course) => {
       const matchesMajor =
         selectedMajor === "all" || course.major === selectedMajor;
-      const matchesQuery =
-        query.length === 0 ||
+      if (query.length === 0) {
+        return matchesMajor;
+      }
+
+      const normalizedCode = course.code.toLowerCase().replace(/[^a-z0-9]/gi, "");
+      const normalizedName = course.name.toLowerCase().replace(/[^a-z0-9]/gi, "");
+      const matchesCode =
         course.code.toLowerCase().includes(query) ||
-        course.name.toLowerCase().includes(query);
+        normalizedCode.includes(normalizedQuery);
+      const matchesName =
+        course.name.toLowerCase().includes(query) ||
+        normalizedName.includes(normalizedQuery);
+      const matchesMajorText = course.major.toLowerCase().includes(query);
+      const matchesQuery = matchesCode || matchesName || matchesMajorText;
       return matchesMajor && matchesQuery;
     });
 
@@ -130,7 +141,7 @@ export function BrowseClassesContent({
               placeholder="Search by course code or name..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] shadow-sm outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_22%,transparent)] sm:w-64"
+              className="w-full rounded-2xl border border-[var(--border-strong)] bg-white/60 px-4 py-3 text-base font-semibold text-[color:var(--page-foreground)] shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_28%,transparent)] focus:shadow-[0_18px_38px_-18px_rgba(0,0,0,0.45)] sm:w-72"
             />
             <select
               value={selectedMajor}
