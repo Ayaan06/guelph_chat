@@ -466,7 +466,7 @@ export function ChatExperience({
                   type="button"
                   onClick={() => setSelectedCourseId(course.id)}
                   className={`flex h-full flex-col justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${
-                    isActive ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50"
+                    isActive ? "border-blue-500 bg-blue-950 text-white ring-2 ring-blue-300" : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50"
                   } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
                 >
                   <div className="space-y-0.5">
@@ -483,7 +483,7 @@ export function ChatExperience({
                         isActive ? "text-slate-300" : "text-slate-500"
                       }`}
                     >
-                      {course.major} - Level {course.level}
+                        {course.major} - Level {course.level}
                     </p>
                   </div>
                   <div className="mt-2 flex items-center justify-between text-[11px] font-semibold">
@@ -517,7 +517,7 @@ export function ChatExperience({
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {activeCourse
-                  ? `${activeCourse.code} â€” ${activeCourse.name}`
+                  `${activeCourse.code} - ${activeCourse.name}`
                   : "Select a class"}
               </h2>
               <p className="text-sm text-slate-600">
@@ -586,7 +586,7 @@ export function ChatExperience({
                       No messages yet.
                     </p>
                     <p className="text-xs text-slate-500">
-                      Start the chat â€” everyone will see it instantly.
+                      Start the chat - everyone will see it instantly.
                     </p>
                   </div>
                 </div>

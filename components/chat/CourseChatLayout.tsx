@@ -384,7 +384,7 @@ export function CourseChatLayout({
                           active ? "text-slate-300" : "text-slate-500"
                         }`}
                       >
-                        {joined.major} • Level {joined.level}
+                        {joined.major} - Level {joined.level}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -409,10 +409,10 @@ export function CourseChatLayout({
                   {hoveredCourseId === joined.id && (
                     <div className="pointer-events-none absolute inset-x-0 translate-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-lg">
                       <p className="font-semibold text-slate-900">
-                        {joined.code} — {joined.name}
+                        {joined.code} - {joined.name}
                       </p>
                       <p className="mt-1 text-slate-600">
-                        {joined.major} · Level {joined.level}
+                        {joined.major} - Level {joined.level}
                       </p>
                     </div>
                   )}
@@ -429,10 +429,10 @@ export function CourseChatLayout({
                 Class chat
               </p>
               <h1 className="text-2xl font-semibold text-slate-900">
-                {course.code} — {course.name}
+                {course.code} - {course.name}
               </h1>
               <p className="text-sm text-slate-600">
-                {majorName ?? course.major} · Level {course.level} · {termLabel}
+                {majorName ?? course.major} - Level {course.level} - {termLabel}
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold">
@@ -449,7 +449,7 @@ export function CourseChatLayout({
                 {hasRealtimeEnv
                   ? isRealtimeActive
                     ? "Realtime connected"
-                    : "Connecting…"
+                    : "Connecting..."
                   : "Live via quick refresh"}
               </span>
             </div>
@@ -497,7 +497,7 @@ export function CourseChatLayout({
                       No messages yet.
                     </p>
                     <p className="text-xs text-slate-500">
-                      Start the chat — classmates will see it instantly.
+                      Start the chat - classmates will see it instantly.
                     </p>
                   </div>
                 </div>
@@ -513,7 +513,7 @@ export function CourseChatLayout({
             <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
               <span>Message</span>
               <span className="text-xs text-slate-500">
-                Enter to send · Shift+Enter for newline
+                Enter to send - Shift+Enter for newline
               </span>
             </div>
             <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
@@ -525,7 +525,7 @@ export function CourseChatLayout({
                     aria-label="Attach (coming soon)"
                     disabled
                   >
-                    📎
+                    <span className="text-lg font-semibold">+</span>
                   </button>
                   <textarea
                     value={draft}
