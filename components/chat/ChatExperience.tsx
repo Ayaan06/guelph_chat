@@ -373,7 +373,6 @@ export function ChatExperience({
     profile:
       | {
           name: string;
-          email?: string;
           majorId?: string;
           majorName?: string;
           year?: string;
@@ -967,7 +966,6 @@ export function ChatExperience({
       const data = (await response.json()) as {
         profile?: {
           name: string;
-          email?: string;
           majorId?: string;
           majorName?: string;
           year?: string;
@@ -1534,7 +1532,7 @@ export function ChatExperience({
               <p className="text-sm text-slate-600">
                 {profileModal.loading
                   ? "Loading profile..."
-                  : profileModal.profile?.email ?? "Email hidden"}
+                  : "Email hidden for privacy"}
               </p>
             </div>
 

@@ -26,7 +26,6 @@ export async function GET(
     where: { id: requestedUserId },
     select: {
       name: true,
-      email: true,
       majorId: true,
       year: true,
       interests: true,
@@ -58,7 +57,6 @@ export async function GET(
   return NextResponse.json({
     profile: {
       name: profile.name ?? "Classmate",
-      email: profile.email ?? undefined,
       majorId: profile.majorId ?? undefined,
       majorName: majorName ?? profile.majorId ?? undefined,
       year: profile.year ?? undefined,
