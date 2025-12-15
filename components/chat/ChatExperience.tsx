@@ -421,7 +421,7 @@ export function ChatExperience({
   return (
     <>
       <div className="space-y-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
@@ -466,8 +466,10 @@ export function ChatExperience({
                   type="button"
                   onClick={() => setSelectedCourseId(course.id)}
                   className={`flex h-full flex-col justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${
-                    isActive ? "border-blue-500 bg-blue-950 text-white ring-2 ring-blue-300" : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50"
-                  } ${isGlobal ? "ring-1 ring-blue-100" : ""}`}
+                    isActive
+                      ? "border-blue-500 bg-blue-950 text-white ring-2 ring-blue-300"
+                      : "border-slate-200 bg-slate-50 hover:border-blue-200 hover:bg-slate-100"
+                  }`}
                 >
                   <div className="space-y-0.5">
                     <p
@@ -508,7 +510,7 @@ export function ChatExperience({
 
         <section
           id="chat-window"
-          className="relative flex min-h-[620px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+          className="relative flex min-h-[620px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 shadow-sm"
         >
           <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
             <div className="space-y-1">
@@ -517,7 +519,7 @@ export function ChatExperience({
               </p>
               <h2 className="text-xl font-semibold text-slate-900">
                 {activeCourse
-                  `${activeCourse.code} - ${activeCourse.name}`
+                  ? `${activeCourse.code} - ${activeCourse.name}`
                   : "Select a class"}
               </h2>
               <p className="text-sm text-slate-600">
