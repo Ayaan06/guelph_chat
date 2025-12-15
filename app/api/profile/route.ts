@@ -39,7 +39,22 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ profile });
+  const memberships = await prisma.classMembership.findMany({
+    where: { userId },
+    include: { course: { select: { id: true, code: true, name: true } } },
+    orderBy: { joinedAt: "desc" },
+  });
+
+  const courses =
+    memberships
+      .filter((membership) => membership.course)
+      .map(({ course }) => ({
+        id: course.id,
+        code: course.code,
+        name: course.name,
+      })) ?? [];
+
+  return NextResponse.json({ profile: { ...profile, courses } });
 }
 
 export async function PUT(request: NextRequest) {

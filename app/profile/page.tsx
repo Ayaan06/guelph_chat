@@ -5,6 +5,7 @@ import { getMajorById, majors, type UserProfile } from "@/lib/mockData";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const session = (await getServerSession(authOptions)) as AppSession | null;
@@ -23,6 +24,20 @@ export default async function ProfilePage() {
     },
   });
 
+  const memberships = await prisma.classMembership.findMany({
+    where: { userId: session.user.id },
+    include: { course: { select: { id: true, code: true, name: true } } },
+    orderBy: { joinedAt: "desc" },
+  });
+
+  const joinedCourses = memberships
+    .filter((membership) => membership.course)
+    .map(({ course }) => ({
+      id: course.id,
+      code: course.code,
+      name: course.name,
+    }));
+
   const userName = user?.name ?? session.user.name ?? session.user.email ?? "";
   const userEmail = user?.email ?? session.user.email ?? undefined;
 
@@ -32,6 +47,7 @@ export default async function ProfilePage() {
     majorId: user?.majorId ?? "",
     year: user?.year ?? "",
     interests: user?.interests ?? [],
+    courses: joinedCourses,
   };
 
   return (
@@ -84,6 +100,33 @@ export default async function ProfilePage() {
                   </dd>
                 </div>
               </dl>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Courses
+              </h3>
+              {profile.courses?.length ? (
+                <ul className="mt-3 space-y-2">
+                  {profile.courses.map((course) => (
+                    <li key={course.id}>
+                      <Link
+                        href={`/chat?courseId=${encodeURIComponent(course.id)}`}
+                        className="flex flex-col rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:bg-blue-50"
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                          {course.code}
+                        </span>
+                        <span>{course.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-slate-600">
+                  Join a class to have it show up here automatically.
+                </p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm text-sm text-blue-900">

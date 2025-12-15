@@ -17,6 +17,11 @@ export type UserProfile = {
   majorId: string;
   year: string;
   interests: string[];
+  courses?: Array<{
+    id: string;
+    code: string;
+    name: string;
+  }>;
 };
 
 export type ClassMessage = {

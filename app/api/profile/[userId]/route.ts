@@ -40,6 +40,21 @@ export async function GET(
   const majorName =
     profile.majorId && majors.find((major) => major.id === profile.majorId)?.name;
 
+  const memberships = await prisma.classMembership.findMany({
+    where: { userId: requestedUserId },
+    include: { course: { select: { id: true, code: true, name: true } } },
+    orderBy: { joinedAt: "desc" },
+  });
+
+  const courses =
+    memberships
+      .filter((membership) => membership.course)
+      .map(({ course }) => ({
+        id: course.id,
+        code: course.code,
+        name: course.name,
+      })) ?? [];
+
   return NextResponse.json({
     profile: {
       name: profile.name ?? "Classmate",
@@ -48,6 +63,7 @@ export async function GET(
       majorName: majorName ?? profile.majorId ?? undefined,
       year: profile.year ?? undefined,
       interests: profile.interests ?? [],
+      courses,
     },
   });
 }
