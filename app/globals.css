@@ -240,3 +240,15 @@ a {
 [data-theme="dark"] ::placeholder {
   color: color-mix(in srgb, var(--muted) 70%, transparent);
 }
+
+@keyframes chatGradientPan {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
