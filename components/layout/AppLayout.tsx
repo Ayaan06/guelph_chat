@@ -22,11 +22,6 @@ const navItems: NavItem[] = [
     match: (pathname) => pathname.startsWith("/chat"),
   },
   {
-    label: "My Classes",
-    href: "/dashboard#your-classes",
-    match: (pathname) => pathname.startsWith("/classes/"),
-  },
-  {
     label: "Browse Classes",
     href: "/classes",
     match: (pathname) => pathname === "/classes",
