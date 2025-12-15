@@ -13,6 +13,10 @@ function sortMessages(messages: MessageDTO[]) {
   );
 }
 
+type AnonymousGlobalChatProps = {
+  allowPosting?: boolean;
+};
+
 function mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
   const map = new Map<string, MessageDTO>();
   current.forEach((message) => map.set(message.id, message));
@@ -20,7 +24,7 @@ function mergeMessages(current: MessageDTO[], incoming: MessageDTO[]) {
   return sortMessages(Array.from(map.values()));
 }
 
-export function AnonymousGlobalChat() {
+export function AnonymousGlobalChat({ allowPosting = true }: AnonymousGlobalChatProps) {
   const GLOBAL_COURSE_ID = "global-chat";
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -228,6 +232,10 @@ export function AnonymousGlobalChat() {
   }, []);
 
   const handleSend = async () => {
+    if (!allowPosting) {
+      setError("Sign in to send messages to the global chat.");
+      return;
+    }
     const trimmed = draft.trim();
     if (!trimmed || isSending) return;
 
@@ -332,6 +340,14 @@ export function AnonymousGlobalChat() {
           </div>
 
           <div className="space-y-2">
+            {!allowPosting && (
+              <div className="flex items-center justify-between rounded-xl border border-[var(--border-soft)] bg-[color-mix(in_srgb,var(--card)_85%,transparent)] px-3 py-2 text-xs font-semibold text-[color:var(--muted)]">
+                <span>Sign in to post in global chat.</span>
+                <span className="rounded-full bg-[var(--accent)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-white">
+                  View-only
+                </span>
+              </div>
+            )}
             <textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
@@ -342,19 +358,21 @@ export function AnonymousGlobalChat() {
                 }
               }}
               rows={3}
-              placeholder="Chat as Anonymous..."
+              placeholder={
+                allowPosting ? "Chat as Anonymous..." : "Viewing only - sign in to chat"
+              }
               className="w-full resize-none rounded-2xl border border-[var(--border-soft)] bg-[var(--card)] px-3 py-2 text-sm text-[color:var(--page-foreground)] outline-none placeholder:text-[color-mix(in_srgb,var(--muted)_70%,transparent)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_30%,transparent)]"
-              disabled={isSending}
+              disabled={isSending || !allowPosting}
             />
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[color:var(--muted)]">
               <span>Enter to send / Shift+Enter for newline</span>
               <button
                 type="button"
                 onClick={handleSend}
-                disabled={!draft.trim() || isSending}
+                disabled={!draft.trim() || isSending || !allowPosting}
                 className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--accent)] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isSending ? "Sending..." : "Send as Anonymous"}
+                {isSending ? "Sending..." : allowPosting ? "Send as Anonymous" : "Disabled"}
               </button>
             </div>
             {error && (

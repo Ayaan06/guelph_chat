@@ -63,7 +63,7 @@ export default async function Home() {
           </section>
 
           <section className="rounded-3xl border border-[var(--hero-card-border)] bg-[var(--hero-card-bg)] p-2 shadow-2xl shadow-[color-mix(in_srgb,var(--accent)_22%,transparent)] backdrop-blur">
-            <AnonymousGlobalChat />
+            <AnonymousGlobalChat allowPosting={false} />
           </section>
         </div>
       </div>
