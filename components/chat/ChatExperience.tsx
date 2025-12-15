@@ -74,6 +74,11 @@ export function ChatExperience({
           majorName?: string;
           year?: string;
           interests?: string[];
+          courses?: Array<{
+            id: string;
+            code: string;
+            name: string;
+          }>;
         }
       | null;
   } | null>(null);
@@ -393,6 +398,11 @@ export function ChatExperience({
           majorName?: string;
           year?: string;
           interests?: string[];
+          courses?: Array<{
+            id: string;
+            code: string;
+            name: string;
+          }>;
         };
       };
 
@@ -732,6 +742,28 @@ export function ChatExperience({
                       ))
                     ) : (
                       <span className="text-slate-500">No interests listed</span>
+                    )}
+                  </dd>
+                </div>
+                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                  <dt className="text-slate-500">Courses</dt>
+                  <dd className="mt-2 flex flex-wrap gap-2">
+                    {profileModal.profile?.courses?.length ? (
+                      profileModal.profile.courses.map((course) => (
+                        <span
+                          key={course.id}
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-800 shadow-sm"
+                        >
+                          <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white">
+                            {course.code}
+                          </span>
+                          <span className="text-[11px]">{course.name}</span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-500">
+                        No courses shared yet
+                      </span>
                     )}
                   </dd>
                 </div>
