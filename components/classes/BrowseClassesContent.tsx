@@ -34,7 +34,7 @@ export function BrowseClassesContent({
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openMajors, setOpenMajors] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(majors.map((major) => [major.id, false])),
+    Object.fromEntries(majors.map((major) => [major.id, true])),
   );
 
   const filteredCourses = useMemo(() => {
@@ -182,11 +182,11 @@ export function BrowseClassesContent({
                   {group.courses.length === 1 ? "" : "s"}
                 </span>
                 <span className="rounded-full border border-[var(--border-strong)] bg-[var(--card-soft)] px-2 py-1 text-xs font-semibold text-[color:var(--page-foreground)]">
-                  {(openMajors[group.major.id] ?? false) ? "Hide" : "Show"}
+                  {(openMajors[group.major.id] ?? true) ? "Hide" : "Show"}
                 </span>
               </div>
             </button>
-            {(openMajors[group.major.id] ?? false) && (
+            {(openMajors[group.major.id] ?? true) && (
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {group.courses.map((course, index) => (
                   <CourseCard
